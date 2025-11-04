@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_social_marketing_global_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'social_marketing', 'bin_size': False}</field>
+    </record>
+
+    <record id="menu_social_marketing_global_settings" model="ir.ui.menu">
+        <field name="action" ref="action_social_marketing_global_settings" />
+    </record>
+
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.social</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+
+                <t groups="social_marketing.group_social_marketing_manager">
+
+                    <app data-string="Social Media" string="Social Media" name="social_marketing" groups="base.group_no_one">
+                        <block title="Demo Mode" name="social_media_demo">
+                            <setting help="Enable this option and load demo data to test the social module. This must never be used on a production database!">
+                                <field name="module_social_marketing_demo"/>
+                            </setting>
+                        </block>
+                        <block title="Developer Accounts" help="Use your own Developer Accounts on our Social app. Those credentials are provided in the developer section of your professional social media account." class="o_social_marketing_developer_settings"></block>
+                    </app>
+                </t>
+            </xpath>
+        </field>
+    </record>
+</odoo>
