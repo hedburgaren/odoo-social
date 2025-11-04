@@ -44,8 +44,6 @@ class SocialPost(models.Model):
     company_id = fields.Many2one('res.company', string='Company',
                                  default=lambda self: self.env.company,
                                  domain=lambda self: [('id', 'in', self.env.companies.ids)])
-    media_ids = fields.Many2many('social.media', compute='_compute_media_ids', store=True,
-                                 help="The social medias linked to the selected social accounts.")
     post_method = fields.Selection([
         ('now', 'Send now'),
         ('scheduled', 'Schedule later')], string="When", default='now', required=True,
