@@ -19,7 +19,7 @@
 
     <data noupdate="1">
 
-    <record id="social_marketing_post_rule_social_marketing_manager" model="ir.rule">
+    <!--<record id="social_marketing_post_rule_social_marketing_manager" model="ir.rule">
         <field name="name">Social: manager: all</field>
         <field name="model_id" ref="social_marketing.model_social_marketing_post"/>
         <field name="domain_force">[(1, '=', 1)]</field>
@@ -51,7 +51,7 @@
         <field name="perm_read" eval="0"/>
         <field name="perm_create" eval="0"/>
     </record>
-
+-->
     <record id="social_marketing_live_post_rule_social_marketing_manager" model="ir.rule">
         <field name="name">Social: manager: all</field>
         <field name="model_id" ref="social_marketing.model_social_live_post"/>
