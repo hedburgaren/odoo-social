@@ -10,7 +10,7 @@
     'website': 'https://vertel.se/app/odoo-social',
     'depends': ['web', 'mail','link_tracker'],
     'data': [
-        'security/social_marketing_security.xml',
+        #'security/social_marketing_security.xml',
         'security/ir.model.access.csv',
         'data/ir_cron_data.xml',
         # ~ 'views/social_marketing_menu_views.xml',

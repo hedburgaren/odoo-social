@@ -45,9 +45,9 @@ class SocialAccount(models.Model):
     social_marketing_account_handle = fields.Char("Handle / Short Name",
         help="Contains the social media handle of the person that created this account. E.g: '@odoo.official' for the 'Odoo' Twitter account")
     active = fields.Boolean("Active", default=True)
-    media_id = fields.Many2one('social.media', string="Social Media", required=True, readonly=True,
-        help="Related Social Media (Facebook, Twitter, ...).", ondelete='cascade')
-    media_type = fields.Selection(related='media_id.media_type')
+    #media_id = fields.Many2one('social.media', string="Social Media", required=True, readonly=True,
+    #    help="Related Social Media (Facebook, Twitter, ...).", ondelete='cascade')
+    #media_type = fields.Selection(related='media_id.media_type')
     stats_link = fields.Char("Stats Link", compute='_compute_stats_link',
         help="Link to the external Social Account statistics")
     image = fields.Image("Image", max_width=128, max_height=128, readonly=True)
@@ -89,11 +89,11 @@ class SocialAccount(models.Model):
         for account in self:
             account.stats_link = False
 
-    @api.depends('media_id')
+    @api.depends('name')
     def _compute_display_name(self):
         """ ex: [Facebook] Odoo Social, [Twitter] Mitchell Admin, ... """
         for account in self:
-            account.display_name = f"[{account.media_id.name}] {account.name if account.name else ''}"
+            account.display_name = f"{account.name if account.name else ''}"
 
     @api.model_create_multi
     def create(self, vals_list):
