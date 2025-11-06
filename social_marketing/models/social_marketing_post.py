@@ -12,7 +12,7 @@ from odoo.exceptions import AccessError, UserError, ValidationError
 
 
 class SocialPost(models.Model):
-    """ A social_marketing.post represents a post that will be published on multiple social.accounts at once.
+    """ A social_marketing.post represents a post that will be published on multiple social_marketing.accounts at once.
     It doesn't do anything on its own except storing the global post configuration (message, images, ...).
 
     This model inherits from `social_marketing.post.template` which contains the common part of both
@@ -20,11 +20,11 @@ class SocialPost(models.Model):
     duplicate the code by inheriting from it. We can generate a `social_marketing.post` from a
     `social_marketing.post.template` with `action_generate_post`.
 
-    When posted, it actually creates several instances of social.live.posts (one per social.account)
-    that will publish their content through the third party API of the social.account. """
+    When posted, it actually creates several instances of social.live.posts (one per social_marketing.account)
+    that will publish their content through the third party API of the social_marketing.account. """
 
     _name = 'social_marketing.post'
-    _inherit = ['mail.thread', 'mail.activity.mixin', 'social_marketing.post.template', 'utm.source.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'utm.source.mixin', 'social_marketing.post.template']  #
     _description = 'Social Post'
     _order = 'create_date desc'
 
@@ -38,12 +38,20 @@ class SocialPost(models.Model):
              "or 'Posted'")
     has_post_errors = fields.Boolean("There are post errors on sub-posts", compute='_compute_has_post_errors')
     account_ids = fields.Many2many(domain="[('id', 'in', account_allowed_ids)]")
-    account_allowed_ids = fields.Many2many('social.account', string='Allowed Accounts',
+    account_allowed_ids = fields.Many2many('social_marketing.account', string='Allowed Accounts',
                                            compute='_compute_account_allowed_ids',
                                            help='List of the accounts which can be selected for this post.')
     company_id = fields.Many2one('res.company', string='Company',
                                  default=lambda self: self.env.company,
                                  domain=lambda self: [('id', 'in', self.env.companies.ids)])
+    media_ids = fields.Many2many('social_marketing.media', compute='_compute_media_ids', store=True,
+                                 help="The social medias linked to the selected social accounts.")
+    live_post_ids = fields.One2many('social_marketing.live.post', 'post_id', string="Posts By Account", readonly=True,
+                                    help="Sub-posts that will be published on each selected social accounts.")
+    live_posts_by_media = fields.Char('Live Posts by Social Media', compute='_compute_live_posts_by_media',
+                                      readonly=True,
+                                      help="Special technical field that holds a dict containing the live posts names by media ids (used for kanban view).")
+
     post_method = fields.Selection([
         ('now', 'Send now'),
         ('scheduled', 'Schedule later')], string="When", default='now', required=True,
@@ -56,18 +64,47 @@ class SocialPost(models.Model):
     calendar_date = fields.Datetime('Calendar Date', compute='_compute_calendar_date', store=True, readonly=False)
     # technical field used by the calendar view (hatch the social_marketing.post)
     is_hatched = fields.Boolean(string="Hatched", compute='_compute_is_hatched')
-    #UTM
+    # UTM
     utm_campaign_id = fields.Many2one('utm.campaign', domain="[('is_auto_campaign', '=', False)]",
                                       string="Campaign", ondelete="set null")
-    source_id = fields.Many2one(readonly=True)
+    source_id = fields.Many2one(readonly=False)
     # Statistics
     stream_posts_count = fields.Integer("Feed Posts Count", compute='_compute_stream_posts_count')
     engagement = fields.Integer("Engagement", compute='_compute_post_engagement',
                                 help="Number of people engagements with the post (Likes, comments...)")
     click_count = fields.Integer('Number of clicks', compute="_compute_click_count")
 
+    @api.depends('company_id')
+    def _compute_account_allowed_ids(self):
+        """Compute the allowed social accounts for this social post.
 
- 
+        If the company is set on the post, we can attach to it account in the same company
+        or without a company. If no company is set on this post, we can attach to it any
+        social account.
+        """
+        all_account_allowed_ids = self.env['social_marketing.account'].search([])
+
+        for post in self:
+            post.account_allowed_ids = all_account_allowed_ids.filtered_domain(post._get_company_domain())
+
+    @api.depends('live_post_ids.engagement')
+    def _compute_post_engagement(self):
+        results = self.env['social_marketing.live.post']._read_group(
+            [('post_id', 'in', self.ids)],
+            ['post_id'],
+            ['engagement:sum']
+        )
+        engagement_per_post = {
+            post.id: engagement_total
+            for post, engagement_total in results
+        }
+        for post in self:
+            post.engagement = engagement_per_post.get(post.id, 0)
+
+    @api.depends('live_post_ids.state')
+    def _compute_has_post_errors(self):
+        for post in self:
+            post.has_post_errors = any(live_post.state == 'failed' for live_post in post.live_post_ids)
 
     @api.depends('state', 'post_method', 'scheduled_date', 'published_date')
     def _compute_calendar_date(self):
@@ -79,8 +116,20 @@ class SocialPost(models.Model):
             else:
                 post.calendar_date = post.scheduled_date
 
+    @api.depends('live_post_ids.account_id', 'live_post_ids.display_name')
+    def _compute_live_posts_by_media(self):
+        """ See field 'help' for more information. """
+        for post in self:
+            accounts_by_media = {media_id: [] for media_id in post.media_ids.ids}
+            for live_post in post.live_post_ids.filtered(lambda lp: lp.account_id.media_id.ids):
+                accounts_by_media[live_post.account_id.media_id.id].append(live_post.display_name)
+            post.live_posts_by_media = json.dumps(accounts_by_media)
 
-  
+    @api.depends('state')
+    def _compute_is_hatched(self):
+        for post in self:
+            post.is_hatched = post.state == 'draft'
+
     def _compute_click_count(self):
         # Filter by `medium_id` so we can compute the click count based
         # on the current companies (1 account == 1 medium)
@@ -105,17 +154,15 @@ class SocialPost(models.Model):
             for post in self:
                 post.click_count = mapped_data.get(post.source_id.id, 0)
 
-  
-
-    @api.depends('message', 'state')
-    def _compute_display_name(self):
-        """ We use the first 20 chars of the message (or "Post" if no message yet).
-        We also add "(Draft)" at the end if the post is still in draft state. """
-        for post in self:
-            post.display_name = self._prepare_post_name(
-                post.message,
-                state=post.state if post.state == 'draft' else False,
-            )
+    # @api.depends('state')
+    # def _compute_display_name(self):
+    #     """ We use the first 20 chars of the message (or "Post" if no message yet).
+    #     We also add "(Draft)" at the end if the post is still in draft state. """
+    #     for post in self:
+    #         post.display_name = self._prepare_post_name(
+    #             post.message,
+    #             state=post.state if post.state == 'draft' else False,
+    #         )
 
     @api.model
     def default_get(self, fields):
@@ -173,8 +220,6 @@ class SocialPost(models.Model):
 
         return super(SocialPost, self).write(vals)
 
-
-
     def _check_post_access(self):
         """
         Raise an error if the user cannot post on a social media
@@ -222,8 +267,8 @@ class SocialPost(models.Model):
         return action
 
     def _action_post(self):
-        """ Called when the post is published on its social.accounts.
-        It will create one social.live.post per social.account and call '_post' on each of them. """
+        """ Called when the post is published on its social_marketing.accounts.
+        It will create one social_marketing.live.post per social_marketing.account and call '_post' on each of them. """
 
         for post in self:
             post.write({
@@ -246,7 +291,7 @@ class SocialPost(models.Model):
 
         for post in self:
             # send the live posts
-            failed_posts = self.env['social.live.post']
+            failed_posts = self.env['social_marketing.live.post']
             for live_post in post.live_post_ids:
                 try:
                     live_post._post()
@@ -257,7 +302,40 @@ class SocialPost(models.Model):
                 'failure_reason': _('Unknown error')
             })
 
+    def _prepare_live_post_values(self):
+        self.ensure_one()
 
+        return [{
+            'post_id': self.id,
+            'account_id': account.id,
+        } for account in self.account_ids]
+
+    def _check_post_completion(self):
+        """ This method will check if all live.posts related to the post are completed ('posted' / 'failed').
+        If it's the case, we can mark the post itself as 'posted'. """
+
+        posts_to_complete = self.filtered(
+            lambda post: all(
+                live_post.state in ('posted', 'failed')
+                for live_post in post.live_post_ids
+            )
+        )
+
+        for post in posts_to_complete:
+            posts_failed = Markup('<br>').join([
+                '  - ' + live_post.display_name
+                for live_post in post.live_post_ids
+                if live_post.state == 'failed'
+            ])
+
+            if posts_failed:
+                post._message_log(body=_("Message posted partially. These are the ones that couldn't be posted:%s",
+                                         Markup("<br/>") + posts_failed))
+            else:
+                post._message_log(body=_("Message posted"))
+
+        if posts_to_complete:
+            posts_to_complete.sudo().write({'state': 'posted'})
 
     def _get_company_domain(self):
         self.ensure_one()
@@ -265,9 +343,6 @@ class SocialPost(models.Model):
             return ['|', ('company_id', '=', False), ('company_id', '=', self.company_id.id)]
         return ['|', ('company_id', '=', False), ('company_id', 'in', self.env.companies.ids)]
 
-
-
-    
     @api.model
     def _cron_publish_scheduled(self):
         """ Method called by the cron job that searches for social_marketing.posts that were scheduled and need
