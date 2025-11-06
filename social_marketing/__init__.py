@@ -2,3 +2,5 @@
 # Vertel AB AGPL-3
 
 from . import models
+from . import controllers
+

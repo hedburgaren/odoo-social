@@ -9,6 +9,7 @@
     </record>
 
     <record id="menu_social_marketing_global_settings" model="ir.ui.menu">
+        <field name="name">Settings</field>
         <field name="action" ref="action_social_marketing_global_settings" />
     </record>
 
@@ -18,10 +19,8 @@
         <field name="inherit_id" ref="base.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//form" position="inside">
-
                 <t groups="social_marketing.group_social_marketing_manager">
-
-                    <app data-string="Social Media" string="Social Media" name="social_marketing" groups="base.group_no_one">
+                    <app data-string="Social Media" string="Social Marketing" name="social_marketing" groups="base.group_no_one">
                         <block title="Demo Mode" name="social_media_demo">
                             <setting help="Enable this option and load demo data to test the social module. This must never be used on a production database!">
                                 <field name="module_social_marketing_demo"/>

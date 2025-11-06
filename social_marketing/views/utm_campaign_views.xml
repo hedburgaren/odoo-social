@@ -66,7 +66,7 @@
     <record id="action_view_utm_campaigns" model="ir.actions.act_window">
         <field name="name">Campaigns</field>
         <field name="res_model">utm.campaign</field>
-        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_mode">kanban,list,form</field>
         <field name="help" type="html">
           <p class="o_view_nocontent_smiling_face">
             Create a Campaign

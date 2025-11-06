@@ -45,12 +45,20 @@ class SocialPostTemplate(models.Model):
     # JSON array capturing the URLs of the images to make it easy to display them in the kanban view
     image_urls = fields.Text(
         'Images URLs', compute='_compute_image_urls')
+    is_split_per_media = fields.Boolean('Split Per Network')
+    media_count = fields.Integer('Media Count', compute='_compute_media_count')
     # Account management
     account_ids = fields.Many2many('social_marketing.account', string='Social Accounts',
                                    help="The accounts on which this post will be published.",
                                    compute='_compute_account_ids', store=True, readonly=False)
     has_active_accounts = fields.Boolean('Are Accounts Available?', compute='_compute_has_active_accounts')
     message_length = fields.Integer(compute='_compute_message_length')
+
+    @api.depends('account_ids')
+    def _compute_media_count(self):
+        for post in self:
+            post.media_count = len(set(post.account_ids.mapped('media_type')))
+
 
     @api.constrains('message')
     def _check_message_not_empty(self):
@@ -78,7 +86,7 @@ class SocialPostTemplate(models.Model):
 
     def _compute_account_ids(self):
         """If there are less than 3 social accounts available, select them all by default."""
-        all_account_ids = self.env['social.account'].sudo().search([])
+        all_account_ids = self.env['social_marketing.account'].sudo().search([])
 
         for post in self:
             accounts = all_account_ids.filtered_domain(post._get_default_accounts_domain())
@@ -86,7 +94,7 @@ class SocialPostTemplate(models.Model):
 
     @api.depends('account_ids')
     def _compute_has_active_accounts(self):
-        has_active_accounts = self.env['social.account'].search_count([]) > 0
+        has_active_accounts = self.env['social_marketing.account'].search_count([]) > 0
         for post in self:
             post.has_active_accounts = has_active_accounts
 
@@ -124,7 +132,7 @@ class SocialPostTemplate(models.Model):
 
     def action_generate_post(self):
         self.ensure_one()
-        action = self.env.ref('social.action_social_marketing_post').read()[0]
+        action = self.env.ref('social_marketing.action_social_marketing_post').read()[0]
         action.update({
             'views': [[False, 'form']],
             'context': {
@@ -151,7 +159,7 @@ class SocialPostTemplate(models.Model):
         kwargs are limited to fields actually used by the underlying implementations
         (e.g: 'youtube_video_id'). """
 
-        if media_type not in [key for (key, val) in self.env['social.media'].fields_get(['media_type'])['media_type']['selection']]:
+        if media_type not in [key for (key, val) in self.env['social_marketing.media'].fields_get(['media_type'])['media_type']['selection']]:
             raise ValueError("Unknown media_type %s" % media_type)
 
         return message or ''
@@ -177,6 +185,6 @@ class SocialPostTemplate(models.Model):
         return None
 
     def _get_default_accounts_domain(self):
-        """ Can be overridden by underlying social.media implementation to remove default accounts.
+        """ Can be overridden by underlying social_marketing.media implementation to remove default accounts.
         It's used to filter the default accounts to tick when creating a new social_marketing.post. """
         return []

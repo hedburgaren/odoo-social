@@ -11,10 +11,10 @@ _logger = logging.getLogger(__name__)
 
 
 class SocialAccount(models.Model):
-    """ A social.account represents an actual account on the related social.media.
+    """ A social_marketing.account represents an actual account on the related social_marketing.media.
     Ex: A Facebook Page or a Twitter Account.
 
-    These social.accounts will then be used to send generic social_marketing.posts to multiple social.accounts.
+    These social_marketing.accounts will then be used to send generic social_marketing.posts to multiple social_marketing.accounts.
     They are also used to display a 'dashboard' of statistics on the 'Feed' view.
 
     Account statistic fields are 'computed' manually through the _compute_statistics method
@@ -30,7 +30,7 @@ class SocialAccount(models.Model):
         necessarily the selected company.
 
         So, before the authentication process, we store the selected company in the
-        user session (see <social.media>::action_add_account) to be able to retrieve it
+        user session (see <social_marketing.media>::action_add_account) to be able to retrieve it
         here.
         """
         if request and 'social_marketing_company_id' in request.session:
@@ -42,16 +42,18 @@ class SocialAccount(models.Model):
         return self.env.company
 
     name = fields.Char('Name', required=True)
-    social_marketing_account_handle = fields.Char("Handle / Short Name",
-        help="Contains the social media handle of the person that created this account. E.g: '@odoo.official' for the 'Odoo' Twitter account")
+    # social_marketing_account_handle = fields.Char("Handle / Short Name",
+    #     help="Contains the social media handle of the person that created this account. E.g: '@odoo.official' for the 'Odoo' Twitter account")
     active = fields.Boolean("Active", default=True)
-    #media_id = fields.Many2one('social.media', string="Social Media", required=True, readonly=True,
-    #    help="Related Social Media (Facebook, Twitter, ...).", ondelete='cascade')
-    #media_type = fields.Selection(related='media_id.media_type')
+    media_id = fields.Many2one('social_marketing.media', string="Social Media", required=True, readonly=True,
+       help="Related Social Media (Facebook, Twitter, ...).", ondelete='cascade')
+    media_type = fields.Selection(related='media_id.media_type')
     stats_link = fields.Char("Stats Link", compute='_compute_stats_link',
         help="Link to the external Social Account statistics")
     image = fields.Image("Image", max_width=128, max_height=128, readonly=True)
     is_media_disconnected = fields.Boolean('Link with external Social Media is broken')
+    social_account_handle = fields.Char("Handle / Short Name",
+                                        help="Contains the social media handle of the person that created this account. E.g: '@odoo.official' for the 'Odoo' X account")
 
     audience = fields.Integer("Audience", readonly=True,
         help="General audience of the Social Account (Page Likes, Account Follows, ...).")
@@ -84,7 +86,7 @@ class SocialAccount(models.Model):
 
     def _compute_stats_link(self):
         """ Every social module should override this method.
-        The 'stats_link' is an external link to the actual social.media statistics for this account.
+        The 'stats_link' is an external link to the actual social_marketing.media statistics for this account.
         Ex: https://www.facebook.com/Odoo-Social-557894618055440/insights """
         for account in self:
             account.stats_link = False
@@ -104,7 +106,7 @@ class SocialAccount(models.Model):
         if all(vals.get('media_id') and vals.get('name') for vals in vals_list):
             # as 'media_id' and 'name' are required fields, we will let the 'create' handle the error
             # if they are not present
-            media_all = self.env['social.media'].search([('id', 'in', [vals.get('media_id') for vals in vals_list])])
+            media_all = self.env['social_marketing.media'].search([('id', 'in', [vals.get('media_id') for vals in vals_list])])
             media_names = {
                 social_marketing_media.id: social_marketing_media.name
                 for social_marketing_media in media_all
@@ -140,7 +142,7 @@ class SocialAccount(models.Model):
     @api.model
     def refresh_statistics(self):
         """ Will re-compute the statistics of all active accounts. """
-        all_accounts = self.env['social.account'].search([('has_account_stats', '=', True)]).sudo()
+        all_accounts = self.env['social_marketing.account'].search([('has_account_stats', '=', True)]).sudo()
         # As computing the statistics is a recurring task, we ignore occasional "read timeouts"
         # from the third-party services, as it would most likely mean a temporary slow connection
         # and/or a slow response from their side.

@@ -44,7 +44,7 @@ class UtmCampaign(models.Model):
         action['views'] = [[False, 'form']]
         action['context'] = {
             'default_utm_campaign_id': self.id,
-            'default_account_ids': self.env['social.account'].search(self._get_social_marketing_media_accounts_domain()).ids
+            'default_account_ids': self.env['social_marketing.account'].search(self._get_social_marketing_media_accounts_domain()).ids
         }
         return action
 

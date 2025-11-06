@@ -1,0 +1,16 @@
+# -*- coding: utf-8 -*-
+# Vertel AB AGPL-3
+
+from odoo import fields, models
+
+
+class SocialStreamType(models.Model):
+    """ Technical model that allows social module implementations ('social_marketing_facebook', 'social_marketing_twitter', ...)
+    to introduce their own social stream types (eg: 'Page Posts' for Facebook, 'Keyword' for Twitter, ...) """
+
+    _name = 'social_marketing.stream.type'
+    _description = 'Social Stream Post'
+
+    name = fields.Char("Name", readonly=True, required=True, translate=True)
+    stream_type = fields.Char("Stream type name (technical)", readonly=True, required=True)
+    media_id = fields.Many2one('social_marketing.media', string="Social Media", readonly=True, required=True)
