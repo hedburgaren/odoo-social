@@ -1,0 +1,302 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* social_marketing_linkedin
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0-20251110\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-11-12 12:32+0000\n"
+"PO-Revision-Date: 2025-11-12 15:02+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: sv\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.4.2\n"
+
+#. module: social_marketing_linkedin
+#: model_terms:ir.ui.view,arch_db:social_marketing_linkedin.linkedin_preview
+msgid "<b>LinkedIn Post</b>"
+msgstr "<b>LinkedIn-inlägg</b>"
+
+#. module: social_marketing_linkedin
+#: model_terms:ir.ui.view,arch_db:social_marketing_linkedin.social_stream_post_view_kanban
+msgid "<i class=\"fa fa-comments me-1\" title=\"Comments\"/>"
+msgstr "<i class=\"fa fa-comments me-1\" title=\"Kommentarer\"/>"
+
+#. module: social_marketing_linkedin
+#: model_terms:ir.ui.view,arch_db:social_marketing_linkedin.social_stream_post_view_kanban
+msgid "<i class=\"fa fa-thumbs-up me-1\" title=\"Likes\"/>"
+msgstr "<i class=\"fa fa-thumbs-up me-1\" title=\"Gillar\"/>"
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,field_description:social_marketing_linkedin.field_social_marketing_live_post__linkedin_post_id
+msgid "Actual LinkedIn ID of the post"
+msgstr "Faktiskt LinkedIn-ID för inlägget"
+
+#. module: social_marketing_linkedin
+#. odoo-python
+#: code:addons/social_marketing_linkedin/models/social_marketing_account.py:0
+msgid "An error occurred when fetching your pages data: “%s”."
+msgstr "Ett fel uppstod när du hämtade dina siddata: \"%s\"."
+
+#. module: social_marketing_linkedin
+#. odoo-python
+#: code:addons/social_marketing_linkedin/models/social_marketing_account.py:0
+msgid "An error occurred when fetching your pages: “%s”."
+msgstr "Ett fel uppstod när dina sidor hämtades: \"%s\"."
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,field_description:social_marketing_linkedin.field_res_config_settings__linkedin_app_id
+msgid "App ID"
+msgstr "App-ID"
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,field_description:social_marketing_linkedin.field_res_config_settings__linkedin_client_secret
+msgid "App Secret"
+msgstr "App-hemlighet"
+
+#. module: social_marketing_linkedin
+#: model_terms:ir.ui.view,arch_db:social_marketing_linkedin.social_stream_post_view_kanban
+msgid "Author Image"
+msgstr "Författarens bild"
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,help:social_marketing_linkedin.field_res_config_settings__linkedin_use_own_account
+msgid ""
+"Check this if you want to use your personal LinkedIn Developer \n"
+"                                              Account instead of the provided one."
+msgstr ""
+"Markera detta om du vill använda ditt personliga LinkedIn Developer\n"
+"                                              konto istället för det tillhandahållna."
+
+#. module: social_marketing_linkedin
+#: model:ir.model,name:social_marketing_linkedin.model_res_config_settings
+msgid "Config Settings"
+msgstr "Inställningar"
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,field_description:social_marketing_linkedin.field_social_marketing_post__display_linkedin_preview
+#: model:ir.model.fields,field_description:social_marketing_linkedin.field_social_marketing_post_template__display_linkedin_preview
+msgid "Display LinkedIn Preview"
+msgstr "Visa LinkedIn-förhandsgranskning"
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields.selection,name:social_marketing_linkedin.selection__social_marketing_media__media_type__linkedin
+#: model:social_marketing.media,name:social_marketing_linkedin.social_media_linkedin
+msgid "LinkedIn"
+msgstr "LinkedIn"
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,field_description:social_marketing_linkedin.field_social_marketing_account__linkedin_account_id
+msgid "LinkedIn Account ID"
+msgstr "LinkedIn-konto ID"
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,field_description:social_marketing_linkedin.field_social_marketing_account__linkedin_account_urn
+#: model:ir.model.fields,help:social_marketing_linkedin.field_social_marketing_account__linkedin_account_urn
+msgid "LinkedIn Account URN"
+msgstr "URN för LinkedIn-konto"
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,field_description:social_marketing_linkedin.field_social_marketing_stream_post__linkedin_comments_count
+msgid "LinkedIn Comments"
+msgstr "Kommentarer från LinkedIn"
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,field_description:social_marketing_linkedin.field_social_marketing_stream_post__linkedin_likes_count
+msgid "LinkedIn Likes"
+msgstr "LinkedIn gillar"
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,field_description:social_marketing_linkedin.field_social_marketing_post__linkedin_preview
+#: model:ir.model.fields,field_description:social_marketing_linkedin.field_social_marketing_post_template__linkedin_preview
+msgid "LinkedIn Preview"
+msgstr "Förhandsgranskning av LinkedIn"
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,field_description:social_marketing_linkedin.field_social_marketing_stream_post__linkedin_author_vanity_name
+msgid "LinkedIn Vanity Name"
+msgstr "LinkedIn Vanity Namn"
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,field_description:social_marketing_linkedin.field_social_marketing_account__linkedin_access_token
+msgid "LinkedIn access token"
+msgstr "LinkedIn-åtkomsttoken"
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,field_description:social_marketing_linkedin.field_social_marketing_stream_post__linkedin_author_id
+msgid "LinkedIn author ID"
+msgstr "LinkedIn författar-ID"
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,field_description:social_marketing_linkedin.field_social_marketing_stream_post__linkedin_author_urn
+msgid "LinkedIn author URN"
+msgstr "URN för LinkedIn-författare"
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,field_description:social_marketing_linkedin.field_social_marketing_stream_post__linkedin_author_image_url
+msgid "LinkedIn author image URL"
+msgstr "URL för författarbild på LinkedIn"
+
+#. module: social_marketing_linkedin
+#. odoo-python
+#: code:addons/social_marketing_linkedin/controllers/main.py:0
+msgid "LinkedIn did not provide a valid access token."
+msgstr "LinkedIn tillhandahöll inte en giltig access-token."
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,field_description:social_marketing_linkedin.field_social_marketing_stream_post__linkedin_post_urn
+msgid "LinkedIn post URN"
+msgstr "URN för LinkedIn-inlägg"
+
+#. module: social_marketing_linkedin
+#: model_terms:ir.ui.view,arch_db:social_marketing_linkedin.res_config_settings_view_form
+msgid "Linkedin Developer Account"
+msgstr "Linkedin Utvecklarkonto"
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,field_description:social_marketing_linkedin.field_social_marketing_media__media_type
+msgid "Media Type"
+msgstr "Typ av media"
+
+#. module: social_marketing_linkedin
+#: model_terms:ir.ui.view,arch_db:social_marketing_linkedin.linkedin_preview
+msgid "Post Image"
+msgstr "Posta bild"
+
+#. module: social_marketing_linkedin
+#: model:social_marketing.stream.type,name:social_marketing_linkedin.stream_type_linkedin_company_post
+msgid "Posts"
+msgstr "Inlägg"
+
+#. module: social_marketing_linkedin
+#. odoo-python
+#: code:addons/social_marketing_linkedin/models/social_marketing_account.py:0
+msgid "Read More about Business Accounts"
+msgstr "Läs mer om företagskonton"
+
+#. module: social_marketing_linkedin
+#: model:ir.model,name:social_marketing_linkedin.model_social_marketing_account
+msgid "Social Account"
+msgstr "Socialt konto"
+
+#. module: social_marketing_linkedin
+#: model:ir.model,name:social_marketing_linkedin.model_social_marketing_live_post
+msgid "Social Live Post"
+msgstr "Social Live Post"
+
+#. module: social_marketing_linkedin
+#: model:ir.model,name:social_marketing_linkedin.model_social_marketing_media
+msgid "Social Media"
+msgstr "Sociala medier"
+
+#. module: social_marketing_linkedin
+#: model:ir.model,name:social_marketing_linkedin.model_social_marketing_post
+msgid "Social Post"
+msgstr "Sociala inlägg"
+
+#. module: social_marketing_linkedin
+#: model:ir.model,name:social_marketing_linkedin.model_social_marketing_post_template
+msgid "Social Post Template"
+msgstr "Mall för sociala inlägg"
+
+#. module: social_marketing_linkedin
+#: model:ir.model,name:social_marketing_linkedin.model_social_marketing_stream
+msgid "Social Stream"
+msgstr "Social ström"
+
+#. module: social_marketing_linkedin
+#: model:ir.model,name:social_marketing_linkedin.model_social_marketing_stream_post
+msgid "Social Stream Post"
+msgstr "Inlägg i sociala medier"
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,help:social_marketing_linkedin.field_social_marketing_account__linkedin_access_token
+msgid "The access token is used to perform request to the REST API"
+msgstr "Access token används för att utföra förfrågningar till REST API"
+
+#. module: social_marketing_linkedin
+#. odoo-python
+#: code:addons/social_marketing_linkedin/controllers/main.py:0
+msgid "There was a authentication issue during your request."
+msgstr "Det uppstod ett autentiseringsproblem under din begäran."
+
+#. module: social_marketing_linkedin
+#. odoo-python
+#: code:addons/social_marketing_linkedin/controllers/main.py:0
+msgid "Unauthorized. Please contact your administrator."
+msgstr "Obehörig. Vänligen kontakta din administratör."
+
+#. module: social_marketing_linkedin
+#. odoo-python
+#: code:addons/social_marketing_linkedin/models/social_marketing_stream_post.py:0
+msgid "Unknown"
+msgstr "Okänd"
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,field_description:social_marketing_linkedin.field_res_config_settings__linkedin_use_own_account
+msgid "Use your own LinkedIn Account"
+msgstr "Använd ditt eget LinkedIn-konto"
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,help:social_marketing_linkedin.field_social_marketing_media__media_type
+msgid ""
+"Used to make comparisons when we need to restrict some features to a specific media "
+"('facebook', 'twitter', ...)."
+msgstr ""
+"Används för att göra jämförelser när vi behöver begränsa vissa funktioner till ett "
+"visst media (\"facebook\", \"twitter\", ...)."
+
+#. module: social_marketing_linkedin
+#: model:ir.model.fields,help:social_marketing_linkedin.field_social_marketing_stream_post__linkedin_author_vanity_name
+msgid "Vanity name, used to generate a link to the author"
+msgstr "Vanity-namn, används för att skapa en länk till författaren"
+
+#. module: social_marketing_linkedin
+#. odoo-python
+#: code:addons/social_marketing_linkedin/models/social_marketing_live_post.py:0
+msgid ""
+"We could not upload your image, try reducing its size and posting it again (error: "
+"Failed during upload registering)."
+msgstr ""
+"Vi kunde inte ladda upp din bild, försök att minska storleken och skicka den igen "
+"(fel: Misslyckades under uppladdningsregistreringen)."
+
+#. module: social_marketing_linkedin
+#. odoo-python
+#: code:addons/social_marketing_linkedin/models/social_marketing_live_post.py:0
+msgid "We could not upload your image, try reducing its size and posting it again."
+msgstr ""
+"Vi kunde inte ladda upp din bild, försök att minska storleken och posta den igen."
+
+#. module: social_marketing_linkedin
+#. odoo-python
+#: code:addons/social_marketing_linkedin/models/social_marketing_stream.py:0
+msgid "Wrong stream type for \"%s\""
+msgstr "Fel strömtyp för \"%s\""
+
+#. module: social_marketing_linkedin
+#. odoo-python
+#: code:addons/social_marketing_linkedin/models/social_marketing_account.py:0
+msgid ""
+"You need a Business Account to post on LinkedIn with Odoo Social.\n"
+" Please create one and make sure it is linked to your account"
+msgstr ""
+"Du behöver ett företagskonto för att publicera inlägg på LinkedIn med Odoo Social.\n"
+" Skapa ett och se till att det är länkat till ditt konto"
+
+#. module: social_marketing_linkedin
+#. odoo-python
+#: code:addons/social_marketing_linkedin/models/social_marketing_media.py:0
+msgid "linkedin_app_id and linkedin_client_secret missing"
+msgstr "linkedin_app_id och linkedin_client_secret saknas"
+
+#. module: social_marketing_linkedin
+#. odoo-python
+#: code:addons/social_marketing_linkedin/models/social_marketing_live_post.py:0
+msgid "unknown"
+msgstr "okänd"
