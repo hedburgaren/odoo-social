@@ -24,7 +24,7 @@ class SocialPost(models.Model):
     that will publish their content through the third party API of the social_marketing.account. """
 
     _name = 'social_marketing.post'
-    _inherit = ['mail.thread', 'mail.activity.mixin', 'utm.source.mixin', 'social_marketing.post.template'] #
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'utm.source.mixin', 'social_marketing.post.template']  #
     _description = 'Social Post'
     _order = 'create_date desc'
 
@@ -64,7 +64,7 @@ class SocialPost(models.Model):
     calendar_date = fields.Datetime('Calendar Date', compute='_compute_calendar_date', store=True, readonly=False)
     # technical field used by the calendar view (hatch the social_marketing.post)
     is_hatched = fields.Boolean(string="Hatched", compute='_compute_is_hatched')
-    #UTM
+    # UTM
     utm_campaign_id = fields.Many2one('utm.campaign', domain="[('is_auto_campaign', '=', False)]",
                                       string="Campaign", ondelete="set null")
     source_id = fields.Many2one(readonly=False)
@@ -130,7 +130,6 @@ class SocialPost(models.Model):
         for post in self:
             post.is_hatched = post.state == 'draft'
 
-  
     def _compute_click_count(self):
         # Filter by `medium_id` so we can compute the click count based
         # on the current companies (1 account == 1 medium)
@@ -154,8 +153,6 @@ class SocialPost(models.Model):
             mapped_data = {datum['source_id']: datum['click_count'] for datum in click_data}
             for post in self:
                 post.click_count = mapped_data.get(post.source_id.id, 0)
-
-  
 
     # @api.depends('state')
     # def _compute_display_name(self):
@@ -222,8 +219,6 @@ class SocialPost(models.Model):
             cron._trigger(at=fields.Datetime.from_string(vals.get('scheduled_date')))
 
         return super(SocialPost, self).write(vals)
-
-
 
     def _check_post_access(self):
         """
@@ -307,7 +302,6 @@ class SocialPost(models.Model):
                 'failure_reason': _('Unknown error')
             })
 
-
     def _prepare_live_post_values(self):
         self.ensure_one()
 
@@ -335,14 +329,13 @@ class SocialPost(models.Model):
             ])
 
             if posts_failed:
-                post._message_log(body=_("Message posted partially. These are the ones that couldn't be posted:%s", Markup("<br/>") + posts_failed))
+                post._message_log(body=_("Message posted partially. These are the ones that couldn't be posted:%s",
+                                         Markup("<br/>") + posts_failed))
             else:
                 post._message_log(body=_("Message posted"))
 
         if posts_to_complete:
             posts_to_complete.sudo().write({'state': 'posted'})
-
-
 
     def _get_company_domain(self):
         self.ensure_one()
@@ -350,9 +343,6 @@ class SocialPost(models.Model):
             return ['|', ('company_id', '=', False), ('company_id', '=', self.company_id.id)]
         return ['|', ('company_id', '=', False), ('company_id', 'in', self.env.companies.ids)]
 
-
-
-    
     @api.model
     def _cron_publish_scheduled(self):
         """ Method called by the cron job that searches for social_marketing.posts that were scheduled and need
