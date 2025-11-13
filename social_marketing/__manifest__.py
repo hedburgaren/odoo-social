@@ -2,7 +2,7 @@
 # Vertel AB AGPL-3
 
 {
-    'name': 'Social Marketing',
+    'name': 'Social: Marketing',
     'category': 'Marketing/Social Marketing',
     'summary': 'Manage your social marketing',
     'version': '1.1',
