@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': 'Social Marketing LinkedIn',
+    'name': 'Social: Marketing LinkedIn',
     'summary': 'Manage your LinkedIn accounts and schedule posts',
     'description': 'Manage your LinkedIn accounts and schedule posts',
     'category': 'Marketing/Social Marketing',

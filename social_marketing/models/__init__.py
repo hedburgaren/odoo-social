@@ -12,4 +12,3 @@ from . import social_marketing_stream_post
 from . import social_marketing_stream_post_image
 from . import social_marketing_stream_type
 from . import social_marketing_live_post
-
