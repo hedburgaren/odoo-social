@@ -43,12 +43,6 @@ class SocialMediaLinkedin(models.Model):
             raise UserError(_("linkedin_app_id and linkedin_client_secret missing"))
 
     def _add_linkedin_accounts_from_configuration(self, linkedin_app_id):
-        # CRITICAL FIX: Generate and save CSRF token
-        # csrf_token = str(uuid.uuid4())
-        # self.csrf_token = csrf_token
-
-        print("token", self.csrf_token)
-
         params = {
             'response_type': 'code',
             'client_id': linkedin_app_id,
@@ -56,8 +50,6 @@ class SocialMediaLinkedin(models.Model):
             'state': self.csrf_token,
             'scope': self._LINKEDIN_SCOPE,
         }
-
-        print("params", params)
 
         return {
             'type': 'ir.actions.act_url',

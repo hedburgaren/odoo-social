@@ -39,7 +39,6 @@ class SocialLinkedinController(SocialController):
                                       {'error_message': _('There was a authentication issue during your request.')})
 
             try:
-                print("access token", access_token)
                 if not access_token:
                     access_token = self._linkedin_get_access_token(code, media)
 
@@ -47,7 +46,6 @@ class SocialLinkedinController(SocialController):
 
             # Both _get_linkedin_access_token and _create_linkedin_accounts may raise a SocialValidationException
             except SocialValidationException as e:
-                print(e.get_message())
                 return request.render(
                     'social_marketing.social_marketing_http_error_view',
                     {'error_message': e.get_message(), 'documentation_data': e.get_documentation_data()})
