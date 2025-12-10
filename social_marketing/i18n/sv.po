@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0-20251110\n"
+"Project-Id-Version: Odoo Server 18.0-20251205\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-12 12:29+0000\n"
-"PO-Revision-Date: 2025-11-12 14:54+0100\n"
+"POT-Creation-Date: 2025-12-10 12:56+0000\n"
+"PO-Revision-Date: 2025-12-10 14:59+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: sv\n"
@@ -59,7 +59,7 @@ msgstr "<i class=\"oi oi-arrow-left\"/> Gå tillbaka till Odoo"
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_media__message_needaction
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_post__message_needaction
 msgid "Action Needed"
-msgstr "Åtgärder krävs"
+msgstr "Åtgärd krävs"
 
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_account__active
@@ -74,12 +74,12 @@ msgstr "Aktiviteter"
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_post__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr "Aktivitet Undantag Dekoration"
+msgstr "Aktivitetsundantagsdekoration"
 
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_post__activity_state
 msgid "Activity State"
-msgstr "Aktivitet Stat"
+msgstr "Aktivitet läge"
 
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_post__activity_type_icon
@@ -90,7 +90,7 @@ msgstr "Aktivitetstyp Ikon"
 #. odoo-javascript
 #: code:addons/social_marketing/static/src/xml/social_marketing_templates.xml:0
 msgid "Add"
-msgstr "Lägg till"
+msgstr "Lägga till"
 
 #. module: social_marketing
 #. odoo-javascript
@@ -120,7 +120,7 @@ msgstr "Lägg till en bild"
 #. odoo-javascript
 #: code:addons/social_marketing/static/src/xml/social_marketing_templates.xml:0
 msgid "All Companies"
-msgstr "Alla företag"
+msgstr "Alla bolag"
 
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_utm_campaign__social_marketing_post_ids
@@ -195,7 +195,7 @@ msgstr "Genom ström"
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_media__csrf_token
 msgid "CSRF Token"
-msgstr "CSRF-token"
+msgstr "CSRF-polett"
 
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_post__calendar_date
@@ -213,7 +213,7 @@ msgstr "Kampanj"
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_media__can_link_accounts
 msgid "Can link accounts?"
-msgstr "Kan du länka konton?"
+msgstr "Kan länkas konton?"
 
 #. module: social_marketing
 #: model_terms:ir.ui.view,arch_db:social_marketing.social_marketing_post_view_form
@@ -229,7 +229,7 @@ msgstr "Klicka för att uppdatera."
 #. module: social_marketing
 #: model_terms:ir.ui.view,arch_db:social_marketing.social_marketing_post_view_form
 msgid "Clicks"
-msgstr "Klicks"
+msgstr "Klick"
 
 #. module: social_marketing
 #: model_terms:ir.ui.view,arch_db:social_marketing.social_marketing_post_view_kanban
@@ -240,7 +240,7 @@ msgstr "Klicks:"
 #. odoo-javascript
 #: code:addons/social_marketing/static/src/xml/social_marketing_templates.xml:0
 msgid "Comment Image"
-msgstr "Hur bild"
+msgstr "Kommentera bild"
 
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_account__company_id
@@ -252,12 +252,12 @@ msgstr "Hur bild"
 #: model_terms:ir.ui.view,arch_db:social_marketing.social_marketing_post_view_search
 #: model_terms:ir.ui.view,arch_db:social_marketing.social_marketing_stream_view_search
 msgid "Company"
-msgstr "Företag"
+msgstr "Bolag"
 
 #. module: social_marketing
 #: model:ir.model,name:social_marketing.model_res_config_settings
 msgid "Config Settings"
-msgstr "Inställningar"
+msgstr "Konfigurationsinställningar"
 
 #. module: social_marketing
 #: model:ir.ui.menu,name:social_marketing.menu_social_marketing_configuration
@@ -332,7 +332,7 @@ msgstr "Skapad av"
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_stream_post_image__create_date
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_stream_type__create_date
 msgid "Created on"
-msgstr "Skapad på"
+msgstr "Skapad den"
 
 #. module: social_marketing
 #: model:ir.model.fields,help:social_marketing.field_social_marketing_account__has_account_stats
@@ -352,7 +352,7 @@ msgstr "Anger om det här kontot har statistiktrender eller inte."
 #. odoo-javascript
 #: code:addons/social_marketing/static/src/xml/social_marketing_templates.xml:0
 msgid "Delete"
-msgstr "Radera"
+msgstr "Ta bort"
 
 #. module: social_marketing
 #. odoo-javascript
@@ -532,7 +532,7 @@ msgstr "Gå till"
 #: model_terms:ir.ui.view,arch_db:social_marketing.social_marketing_stream_post_view_search
 #: model_terms:ir.ui.view,arch_db:social_marketing.social_marketing_stream_view_search
 msgid "Group By"
-msgstr "Grupp av"
+msgstr "Gruppera"
 
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_account__social_account_handle
@@ -685,7 +685,7 @@ msgstr "Senast uppdaterad den"
 #. odoo-javascript
 #: code:addons/social_marketing/static/src/xml/social_marketing_templates.xml:0
 msgid "Like"
-msgstr "Liksom"
+msgstr "Gilla"
 
 #. module: social_marketing
 #. odoo-javascript
@@ -696,19 +696,19 @@ msgstr "Gillar"
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_stream_post__link_description
 msgid "Link Description"
-msgstr "Länk Beskrivning"
+msgstr "Länkbeskrivning"
 
 #. module: social_marketing
 #. odoo-javascript
 #: code:addons/social_marketing/static/src/xml/social_marketing_templates.xml:0
 #: model_terms:ir.ui.view,arch_db:social_marketing.social_marketing_stream_post_view_kanban
 msgid "Link Image"
-msgstr "Länk bild"
+msgstr "Länkbild"
 
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_stream_post__link_image_url
 msgid "Link Image URL"
-msgstr "Länk Bild URL"
+msgstr "Länkbild URL"
 
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_stream_post__link_title
@@ -785,7 +785,7 @@ msgstr "Ladda fler kommentarer..."
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_media__max_post_length
 msgid "Max Post Length"
-msgstr "Max stolplängd"
+msgstr "Max inläggslängd"
 
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_post__media_ids
@@ -829,7 +829,7 @@ msgstr "Meddelandets längd"
 #: code:addons/social_marketing/models/social_marketing_post.p.py:0
 #: code:addons/social_marketing/models/social_marketing_post.py:0
 msgid "Message posted"
-msgstr "Meddelande publicerat"
+msgstr "Meddelande postat"
 
 #. module: social_marketing
 #. odoo-python
@@ -851,9 +851,9 @@ msgid ""
 "party API.\n"
 "        A 'Posting' state is also available for those that are sent through batching (like push notifications)."
 msgstr ""
-"De flesta social.live.posts går direkt från Ready till Posted/Failed eftersom de är resultatet av ett enda anrop "
-"till API:et från tredje part.\n"
-"        Ett \"Posting\"-tillstånd är också tillgängligt för de som skickas genom batching (som push-meddelanden)."
+"De flesta social.live.posts går direkt från Färdig till Postad/Misslyckad eftersom de är resultatet av ett enda "
+"anrop till API:et från tredje part.\n"
+"        Ett \"Postat\"-läge är också möjligt för de som skickas genom batching (som push-meddelanden)."
 
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_post__my_activity_date_deadline
@@ -898,11 +898,6 @@ msgstr "Nytt innehåll tillgängligt"
 #: code:addons/social_marketing/static/src/xml/social_marketing_templates.xml:0
 msgid "Next"
 msgstr "Nästa"
-
-#. module: social_marketing
-#: model:ir.model.fields,field_description:social_marketing.field_social_marketing_post__activity_calendar_event_id
-msgid "Next Activity Calendar Event"
-msgstr "Nästa aktivitet i aktivitetskalendern"
 
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_post__activity_date_deadline
@@ -1049,7 +1044,7 @@ msgstr "Ange minst ett konto att posta till (för post ID(s) %s)."
 #. module: social_marketing
 #: model_terms:ir.ui.view,arch_db:social_marketing.social_marketing_post_view_form
 msgid "Post"
-msgstr "Inlägg"
+msgstr "Post"
 
 #. module: social_marketing
 #. odoo-javascript
@@ -1166,12 +1161,6 @@ msgid "Published date"
 msgstr "Publicerat datum"
 
 #. module: social_marketing
-#: model:ir.model.fields,field_description:social_marketing.field_social_marketing_media__rating_ids
-#: model:ir.model.fields,field_description:social_marketing.field_social_marketing_post__rating_ids
-msgid "Ratings"
-msgstr "Betyg"
-
-#. module: social_marketing
 #: model:ir.model.fields.selection,name:social_marketing.selection__social_marketing_live_post__state__ready
 msgid "Ready"
 msgstr "Klar"
@@ -1211,7 +1200,7 @@ msgstr "Försök igen"
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_media__message_has_sms_error
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_post__message_has_sms_error
 msgid "SMS Delivery error"
-msgstr "Fel vid leverans av SMS"
+msgstr "SMS leveransfel"
 
 #. module: social_marketing
 #: model_terms:ir.ui.view,arch_db:social_marketing.social_marketing_post_view_form
@@ -1226,12 +1215,12 @@ msgstr "Schema senare"
 #. module: social_marketing
 #: model:ir.model.fields.selection,name:social_marketing.selection__social_marketing_post__state__scheduled
 msgid "Scheduled"
-msgstr "Planerad"
+msgstr "Schemalagd"
 
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_post__scheduled_date
 msgid "Scheduled Date"
-msgstr "Planerat datum"
+msgstr "Schemalagt datum"
 
 #. module: social_marketing
 #: model:ir.model.fields.selection,name:social_marketing.selection__social_marketing_post__post_method__now
@@ -1281,7 +1270,7 @@ msgstr "Sociala konton"
 #. module: social_marketing
 #: model:ir.model,name:social_marketing.model_social_marketing_live_post
 msgid "Social Live Post"
-msgstr "Social Live Post"
+msgstr "Sociala live-inlägg"
 
 #. module: social_marketing
 #: model:res.groups,name:social_marketing.group_social_marketing_manager
@@ -1385,7 +1374,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/social_marketing/static/src/js/stream_post_kanban_dashboard.js:0
 msgid "Sorry, you're not allowed to re-link this account, please contact your administrator."
-msgstr "Tyvärr, du får inte länka om det här kontot, vänligen kontakta din administratör."
+msgstr "Du har tyvärr inte tillåtelse att vidarelänka det här kontot. Kontakta administratören."
 
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_post__source_id
@@ -1409,7 +1398,7 @@ msgstr "Uppdelning per nätverk"
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_account__stats_link
 msgid "Stats Link"
-msgstr "Stats Link"
+msgstr "Statestiklänk"
 
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_live_post__state
@@ -1488,13 +1477,13 @@ msgstr "Underinlägg som kommer att publiceras på varje utvalt socialt konto."
 #. odoo-javascript
 #: code:addons/social_marketing/static/src/xml/social_marketing_templates.xml:0
 msgid "Sync"
-msgstr "Synkronisera"
+msgstr "Synk"
 
 #. module: social_marketing
 #. odoo-python
 #: code:addons/social_marketing/models/social_marketing_post_template.py:0
 msgid "The 'message' field is required for post ID %s"
-msgstr "Fältet \"message\" är obligatoriskt för inläggs-ID %s"
+msgstr "Fältet \"meddelande\" är obligatoriskt för inläggs-ID %s"
 
 #. module: social_marketing
 #: model:ir.model.fields,help:social_marketing.field_social_marketing_post__account_ids
@@ -1514,7 +1503,7 @@ msgid ""
 "'Posted'"
 msgstr ""
 "Inlägget anses vara \"Postat\" när alla dess underinlägg (ett per socialt konto) antingen är \"Misslyckat\" "
-"eller \"Postat"
+"eller \"Postat\""
 
 #. module: social_marketing
 #: model:ir.model.fields,help:social_marketing.field_social_marketing_stream_post__published_date
@@ -1582,7 +1571,7 @@ msgstr "UTM kampanj"
 #: model:ir.model,name:social_marketing.model_utm_medium
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_account__utm_medium_id
 msgid "UTM Medium"
-msgstr "UTM Medium"
+msgstr "UTM Medier"
 
 #. module: social_marketing
 #: model:ir.model,name:social_marketing.model_utm_source
@@ -1626,18 +1615,6 @@ msgstr ""
 #: code:addons/social_marketing/static/src/xml/social_marketing_templates.xml:0
 msgid "View"
 msgstr "Vy"
-
-#. module: social_marketing
-#: model:ir.model.fields,field_description:social_marketing.field_social_marketing_media__website_message_ids
-#: model:ir.model.fields,field_description:social_marketing.field_social_marketing_post__website_message_ids
-msgid "Website Messages"
-msgstr "Webbplatsmeddelanden"
-
-#. module: social_marketing
-#: model:ir.model.fields,help:social_marketing.field_social_marketing_media__website_message_ids
-#: model:ir.model.fields,help:social_marketing.field_social_marketing_post__website_message_ids
-msgid "Website communication history"
-msgstr "Webbplatsens kommunikationshistorik"
 
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_post__post_method
