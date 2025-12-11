@@ -1,4 +1,4 @@
-# Translation of Odoo Server.
+F# Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* social_marketing
 #
@@ -537,7 +537,7 @@ msgstr "Gruppera"
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_account__social_account_handle
 msgid "Handle / Short Name"
-msgstr "Handtag / Kort namn"
+msgstr "Handtag / Kortnamn"
 
 #. module: social_marketing
 #: model:ir.model.fields,field_description:social_marketing.field_social_marketing_account__has_account_stats
@@ -729,7 +729,7 @@ msgstr "Länka ett nytt konto"
 #. module: social_marketing
 #: model_terms:ir.ui.view,arch_db:social_marketing.social_marketing_media_view_kanban
 msgid "Link account"
-msgstr "Länk konto"
+msgstr "Länka konto"
 
 #. module: social_marketing
 #: model_terms:ir.actions.act_window,help:social_marketing.action_social_marketing_account
