@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_social_marketing_post_template_form_facebook" model="ir.ui.view">
+        <field name="name">social_marketing.post.template.form.facebook</field>
+        <field name="model">social_marketing.post.template</field>
+        <field name="inherit_id" ref="social_marketing.social_marketing_post_template_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Facebook" name="facebook"
+                      attrs="{'invisible': [('is_split_per_media', '=', False)]}">
+                    <group>
+                        <field name="facebook_message"/>
+                        <field name="facebook_image_ids" widget="many2many_binary"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -35,4 +35,9 @@
               parent="social_marketing.menu_social_marketing_global"
               sequence="25"/>
 
+    <menuitem id="menu_unified_inbox"
+              action="action_social_marketing_message"
+              parent="social_marketing.menu_social_marketing_global"
+              sequence="3"/>
+
 </odoo>

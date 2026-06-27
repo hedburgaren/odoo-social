@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="social_marketing_media_instagram" model="social_marketing.media">
+        <field name="name">Instagram</field>
+        <field name="media_type">instagram</field>
+        <field name="media_description">Schedule and manage your Instagram posts, stories, and reels. Monitor comments and DMs.</field>
+        <field name="has_streams" eval="True"/>
+        <field name="can_link_accounts" eval="True"/>
+        <field name="max_post_length">2200</field>
+    </record>
+
+    <record id="social_marketing_stream_type_instagram_feed" model="social_marketing.stream.type">
+        <field name="name">Instagram Feed</field>
+        <field name="media_id" ref="social_marketing_media_instagram"/>
+        <field name="stream_type">instagram_feed</field>
+    </record>
+</odoo>

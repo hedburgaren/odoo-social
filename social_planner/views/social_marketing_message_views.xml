@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Unified Inbox - Kanban View (primary) -->
+    <record id="view_social_marketing_message_kanban" model="ir.ui.view">
+        <field name="name">social_marketing.message.kanban</field>
+        <field name="model">social_marketing.message</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile o_social_inbox_kanban"
+                    default_group_by="media_type"
+                    quick_create="false">
+                <field name="from_name"/>
+                <field name="from_handle"/>
+                <field name="body"/>
+                <field name="message_type"/>
+                <field name="media_type"/>
+                <field name="state"/>
+                <field name="priority"/>
+                <field name="assigned_to"/>
+                <field name="social_account_id"/>
+                <field name="create_date"/>
+                <field name="from_avatar_url"/>
+                <field name="response_time_minutes"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click o_social_inbox_card #{state == 'unread' and 'o_social_inbox_unread' or ''} #{priority in ['2','3'] and 'o_social_inbox_priority' or ''}">
+                            <div class="o_social_inbox_card_header">
+                                <img t-att-src="from_avatar_url"
+                                     t-att-alt="from_name"
+                                     class="o_social_inbox_avatar"
+                                     onerror="this.style.display='none'"/>
+                                <div class="o_social_inbox_sender">
+                                    <strong><field name="from_name"/></strong>
+                                    <span class="text-muted" t-if="from_handle">
+                                        <field name="from_handle"/>
+                                    </span>
+                                </div>
+                                <div class="o_social_inbox_meta">
+                                    <span t-attf-class="badge #{media_type == 'linkedin' and 'badge-primary' or media_type == 'facebook' and 'badge-info' or media_type == 'instagram' and 'badge-danger' or 'badge-secondary'}">
+                                        <field name="media_type"/>
+                                    </span>
+                                    <span class="badge badge-light">
+                                        <field name="message_type"/>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="o_social_inbox_card_body">
+                                <p><field name="body"/></p>
+                            </div>
+
+                            <div class="o_social_inbox_card_footer">
+                                <div class="o_social_inbox_tags">
+                                    <field name="tag_ids" widget="many2many_tags"
+                                           options="{'color_field': 'color'}"/>
+                                </div>
+                                <div class="o_social_inbox_actions">
+                                    <span class="text-muted" t-if="response_time_minutes > 0">
+                                        ⏱ <field name="response_time_minutes"/> min
+                                    </span>
+                                    <span class="text-muted">
+                                        <field name="create_date" widget="relative_time"/>
+                                    </span>
+                                    <field name="assigned_to" widget="badge"
+                                           decoration-info="assigned_to == uid"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Unified Inbox - List View -->
+    <record id="view_social_marketing_message_tree" model="ir.ui.view">
+        <field name="name">social_marketing.message.tree</field>
+        <field name="model">social_marketing.message</field>
+        <field name="arch" type="xml">
+            <tree string="Inbox" decoration-info="state == 'unread'" decoration-muted="state == 'archived'">
+                <field name="state" widget="badge"
+                       decoration-info="state == 'unread'"
+                       decoration-success="state == 'replied'"/>
+                <field name="priority" widget="priority"/>
+                <field name="media_type" widget="badge"/>
+                <field name="message_type" widget="badge"/>
+                <field name="from_name"/>
+                <field name="body"/>
+                <field name="social_account_id"/>
+                <field name="assigned_to"/>
+                <field name="response_time_minutes"/>
+                <field name="create_date" widget="relative_time"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Unified Inbox - Form View -->
+    <record id="view_social_marketing_message_form" model="ir.ui.view">
+        <field name="name">social_marketing.message.form</field>
+        <field name="model">social_marketing.message</field>
+        <field name="arch" type="xml">
+            <form string="Message">
+                <header>
+                    <button name="action_mark_read" string="Mark Read" type="object"
+                            states="unread" class="btn-secondary"/>
+                    <button name="action_mark_unread" string="Mark Unread" type="object"
+                            states="read,replied" class="btn-secondary"/>
+                    <button name="action_archive" string="Archive" type="object"
+                            states="unread,read,replied" class="btn-secondary"/>
+                    <button name="action_assign_to_me" string="Assign to Me" type="object"
+                            class="btn-primary"
+                            attrs="{'invisible': [('assigned_to', '=', uid)]}"/>
+                    <button name="action_open_external" string="Open on Platform" type="object"
+                            class="btn-secondary"
+                            attrs="{'invisible': [('external_url', '=', False)]}"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="unread,read,replied,archived"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h2><field name="from_name"/></h2>
+                        <span class="text-muted"><field name="from_handle"/></span>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="media_type"/>
+                            <field name="message_type"/>
+                            <field name="social_account_id"/>
+                        </group>
+                        <group>
+                            <field name="assigned_to"/>
+                            <field name="priority"/>
+                            <field name="tag_ids" widget="many2many_tags"
+                                   options="{'color_field': 'color'}"/>
+                        </group>
+                    </group>
+                    <group string="Message">
+                        <field name="body" nolabel="1" readonly="1"
+                               class="oe_read_only oe_inline"/>
+                    </group>
+                    <group string="Reply" name="reply_group">
+                        <p class="text-muted">
+                            Use the chatter below to reply. Platform API reply will be
+                            triggered for supported platforms (LinkedIn, Facebook, Instagram).
+                        </p>
+                        <field name="external_url" widget="url"
+                               string="View on platform"/>
+                    </group>
+                    <!-- Threaded conversation -->
+                    <group string="Conversation" name="conversation_group"
+                           attrs="{'invisible': [('child_ids', '=', [])]}">
+                        <field name="child_ids" nolabel="1">
+                            <tree>
+                                <field name="create_date" widget="relative_time"/>
+                                <field name="from_name"/>
+                                <field name="body"/>
+                                <field name="is_incoming" widget="boolean_toggle"/>
+                                <field name="state"/>
+                            </tree>
+                        </field>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Unified Inbox - Search View -->
+    <record id="view_social_marketing_message_search" model="ir.ui.view">
+        <field name="name">social_marketing.message.search</field>
+        <field name="model">social_marketing.message</field>
+        <field name="arch" type="xml">
+            <search string="Search Inbox">
+                <field name="from_name"/>
+                <field name="from_handle"/>
+                <field name="body"/>
+                <filter name="unread" string="Unread" domain="[('state','=','unread')]"/>
+                <filter name="read" string="Read" domain="[('state','=','read')]"/>
+                <filter name="replied" string="Replied" domain="[('state','=','replied')]"/>
+                <filter name="archived_f" string="Archived" domain="[('state','=','archived')]"/>
+                <separator/>
+                <filter name="my" string="Assigned to Me" domain="[('assigned_to','=',uid)]"/>
+                <filter name="unassigned" string="Unassigned" domain="[('assigned_to','=',False)]"/>
+                <filter name="urgent" string="Urgent" domain="[('priority','=','3')]"/>
+                <separator/>
+                <filter name="linkedin_f" string="LinkedIn" domain="[('media_type','=','linkedin')]"/>
+                <filter name="facebook_f" string="Facebook" domain="[('media_type','=','facebook')]"/>
+                <filter name="instagram_f" string="Instagram" domain="[('media_type','=','instagram')]"/>
+                <filter name="dm_f" string="Direct Messages" domain="[('message_type','=','dm')]"/>
+                <filter name="comment_f" string="Comments" domain="[('message_type','=','comment')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_platform" string="Platform" context="{'group_by':'media_type'}"/>
+                    <filter name="group_by_type" string="Type" context="{'group_by':'message_type'}"/>
+                    <filter name="group_by_state" string="Status" context="{'group_by':'state'}"/>
+                    <filter name="group_by_assigned" string="Assigned To" context="{'group_by':'assigned_to'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Unified Inbox - Pivot View for Analytics -->
+    <record id="view_social_marketing_message_pivot" model="ir.ui.view">
+        <field name="name">social_marketing.message.pivot</field>
+        <field name="model">social_marketing.message</field>
+        <field name="arch" type="xml">
+            <pivot string="Inbox Analytics" disable_linking="1">
+                <field name="media_type" type="col"/>
+                <field name="message_type" type="row"/>
+                <field name="state" type="col"/>
+                <field name="response_time_minutes" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Unified Inbox - Action -->
+    <record id="action_social_marketing_message" model="ir.actions.act_window">
+        <field name="name">Unified Inbox</field>
+        <field name="res_model">social_marketing.message</field>
+        <field name="view_mode">kanban,tree,pivot,form</field>
+        <field name="search_view_id" ref="view_social_marketing_message_search"/>
+        <field name="context">{'search_default_unread': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Your inbox is empty!</p>
+            <p>
+                Connect social media accounts to start receiving messages here.
+                All DMs, comments, and mentions will appear in this unified inbox.
+            </p>
+        </field>
+    </record>
+
+    <!-- Snippet for SCSS styling -->
+    <template id="social_inbox_assets" inherit_id="web.assets_backend" name="Social Inbox Assets">
+        <xpath expr="." position="inside">
+            <link rel="stylesheet" href="/social_planner/static/src/scss/social_planner.scss"/>
+        </xpath>
+    </template>
+</odoo>

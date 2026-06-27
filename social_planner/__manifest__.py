@@ -22,6 +22,8 @@ Social Planner — Kommunikationsplanering för sociala medier
     'depends': [
         'social_marketing',
         'social_marketing_linkedin',
+        'social_marketing_facebook',
+        'social_marketing_instagram',
         'ai_agent',
     ],
     'data': [
@@ -36,6 +38,7 @@ Social Planner — Kommunikationsplanering för sociala medier
         'views/social_marketing_post_views.xml',
         'views/social_listening_views.xml',
         'views/social_marketing_competitor_views.xml',
+        'views/social_marketing_message_views.xml',
         'views/menu_views.xml',
     ],
     'demo': [],

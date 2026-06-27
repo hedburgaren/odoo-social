@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="social_marketing_media_facebook" model="social_marketing.media">
+        <field name="name">Facebook</field>
+        <field name="media_type">facebook</field>
+        <field name="media_description">Schedule and manage your Facebook posts, monitor comments and DMs.</field>
+        <field name="has_streams" eval="True"/>
+        <field name="can_link_accounts" eval="True"/>
+        <field name="max_post_length">63206</field>
+    </record>
+
+    <record id="social_marketing_stream_type_facebook_page_feed" model="social_marketing.stream.type">
+        <field name="name">Facebook Page Feed</field>
+        <field name="media_id" ref="social_marketing_media_facebook"/>
+        <field name="stream_type">facebook_page_feed</field>
+    </record>
+</odoo>
