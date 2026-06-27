@@ -1,0 +1,17 @@
+# Odoo Social — Python dependencies
+# Install with: pip install -r requirements.txt
+
+# Core (installed by Odoo)
+# requests
+
+# LinkedIn — official API
+# Uses built-in requests library, no extra deps
+
+# LinkedIn — cookie-based auth (linkedin-api library by Tom Quirk)
+# https://github.com/tomquirk/linkedin-api
+linkedin-api
+
+# LinkedIn — Playwright browser automation
+# Persistent browser context, session reuse, CAPTCHA-resistant
+# After pip install, run: playwright install chromium
+playwright
