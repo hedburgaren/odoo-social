@@ -6,8 +6,18 @@
         <field name="model">social_marketing.post</field>
         <field name="inherit_id" ref="social_marketing.social_marketing_post_view_form"/>
         <field name="arch" type="xml">
-            <!-- Add approval buttons inside existing header -->
+            <!-- Add AI generation buttons inside existing header -->
             <xpath expr="//header" position="inside">
+                <button name="action_ai_generate" string="✨ Generate with AI" type="object"
+                        class="btn-info"
+                        attrs="{'invisible': ['|', ('policy_id', '=', False), ('state', 'not in', ['draft'])]}"
+                        groups="social_planner.group_social_content_creator"
+                        help="Generate post content using AI based on your communication policy and plan context."/>
+                <button name="action_ai_suggest_hashtags" string="# Suggest Hashtags" type="object"
+                        class="btn-secondary"
+                        attrs="{'invisible': ['|', ('policy_id', '=', False), ('state', 'not in', ['draft'])]}"
+                        groups="social_planner.group_social_content_creator"/>
+            </xpath>
                 <button name="action_submit_for_approval" string="Submit for Approval"
                         type="object" class="btn-primary"
                         attrs="{'invisible': ['|', ('policy_id', '=', False), ('approval_state', 'not in', ['draft', 'rejected'])]}"

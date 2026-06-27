@@ -18,4 +18,16 @@
               parent="social_marketing.menu_social_marketing_global"
               sequence="17"/>
 
+    <menuitem id="menu_listening_topic"
+              action="action_social_listening_topic"
+              parent="social_marketing.menu_social_marketing_configuration"
+              sequence="15"
+              groups="social_marketing.group_social_marketing_manager"/>
+
+    <menuitem id="menu_media_asset"
+              action="action_social_media_asset"
+              parent="social_marketing.menu_social_marketing_configuration"
+              sequence="16"
+              groups="social_marketing.group_social_marketing_manager"/>
+
 </odoo>

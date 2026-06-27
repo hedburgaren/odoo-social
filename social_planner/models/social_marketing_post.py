@@ -205,9 +205,60 @@ class SocialMarketingPost(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
-        # Om state ändras till 'posted', uppdatera plan_line status
         if vals.get('state') == 'posted':
             for post in self:
                 if post.plan_line_id:
                     post.plan_line_id._check_line_completion()
         return res
+
+    # --- AI Integration ---
+
+    def action_ai_generate(self):
+        """ Generera innehåll med AI. """
+        self.ensure_one()
+        ai_helper = self.env['social.planner.ai']
+        success = ai_helper.generate_post_content(self.id)
+        if success:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('AI Content Generated'),
+                    'message': _('Content has been generated and filled into the post.'),
+                    'type': 'success',
+                    'sticky': False,
+                }
+            }
+        else:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('AI Generation Failed'),
+                    'message': _('Could not generate content. Make sure an AI agent is configured.'),
+                    'type': 'warning',
+                    'sticky': True,
+                }
+            }
+
+    def action_ai_suggest_hashtags(self):
+        """ Föreslå hashtags med AI. """
+        self.ensure_one()
+        ai_helper = self.env['social.planner.ai']
+        hashtags = ai_helper.suggest_hashtags(self.id)
+        if hashtags:
+            current = self.message or ''
+            new_message = current + '\n\n' + ' '.join(hashtags)
+            self.write({'message': new_message})
+
+    def action_ai_analyze_sentiment(self):
+        """ Analysera sentiment för postens innehåll. """
+        self.ensure_one()
+        if not self.message:
+            return
+        ai_helper = self.env['social.planner.ai']
+        result = ai_helper.analyze_sentiment(self.message)
+        self.message_post(
+            body=_('AI Sentiment Analysis: %(sentiment)s (score: %(score).2f)',
+                   sentiment=result['sentiment'], score=result['score']),
+            message_type='notification')

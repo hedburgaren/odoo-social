@@ -33,6 +33,7 @@ Social Planner — Kommunikationsplanering för sociala medier
         'views/communication_plan_views.xml',
         'views/content_calendar_views.xml',
         'views/social_marketing_post_views.xml',
+        'views/social_listening_views.xml',
         'views/menu_views.xml',
     ],
     'demo': [],

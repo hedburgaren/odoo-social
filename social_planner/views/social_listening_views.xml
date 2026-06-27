@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Social Listening Topic - Tree View -->
+    <record id="view_social_listening_topic_tree" model="ir.ui.view">
+        <field name="name">social_marketing.listening.topic.tree</field>
+        <field name="model">social_marketing.listening.topic</field>
+        <field name="arch" type="xml">
+            <tree string="Listening Topics">
+                <field name="name"/>
+                <field name="policy_id"/>
+                <field name="mention_count"/>
+                <field name="last_checked"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Social Listening Topic - Form View -->
+    <record id="view_social_listening_topic_form" model="ir.ui.view">
+        <field name="name">social_marketing.listening.topic.form</field>
+        <field name="model">social_marketing.listening.topic</field>
+        <field name="arch" type="xml">
+            <form string="Listening Topic">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="policy_id"/>
+                        <field name="active"/>
+                    </group>
+                    <group string="Keywords">
+                        <field name="keywords" nolabel="1"
+                               placeholder="Enter keywords one per line. Use # for hashtags."/>
+                        <field name="exclude_keywords" nolabel="1"
+                               placeholder="Keywords to exclude..."/>
+                    </group>
+                    <group string="Streams">
+                        <field name="stream_ids" widget="many2many_tags"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Social Listening Topic - Action -->
+    <record id="action_social_listening_topic" model="ir.actions.act_window">
+        <field name="name">Listening Topics</field>
+        <field name="res_model">social_marketing.listening.topic</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Social Media Asset - Tree View -->
+    <record id="view_social_media_asset_tree" model="ir.ui.view">
+        <field name="name">social_marketing.media.asset.tree</field>
+        <field name="model">social_marketing.media.asset</field>
+        <field name="arch" type="xml">
+            <tree string="Media Assets">
+                <field name="name"/>
+                <field name="asset_type"/>
+                <field name="category"/>
+                <field name="tags"/>
+                <field name="policy_approved"/>
+                <field name="usage_count"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Social Media Asset - Form View -->
+    <record id="view_social_media_asset_form" model="ir.ui.view">
+        <field name="name">social_marketing.media.asset.form</field>
+        <field name="model">social_marketing.media.asset</field>
+        <field name="arch" type="xml">
+            <form string="Media Asset">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="attachment_id"/>
+                        <field name="asset_type"/>
+                    </group>
+                    <group>
+                        <field name="category"/>
+                        <field name="tags"/>
+                        <field name="policy_id"/>
+                        <field name="policy_approved"/>
+                    </group>
+                    <group string="AI Analysis">
+                        <field name="ai_tags"/>
+                        <field name="ai_description"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Social Media Asset - Action -->
+    <record id="action_social_media_asset" model="ir.actions.act_window">
+        <field name="name">Media Assets</field>
+        <field name="res_model">social_marketing.media.asset</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>
