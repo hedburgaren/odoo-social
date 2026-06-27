@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.social.postiz</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="social_marketing.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[hasclass('o_social_marketing_developer_settings')]" position="inside">
+                <setting string="Postiz — Universal API Proxy">
+                    <div class="content-group">
+                        <div class="mt16">
+                            <label for="postiz_api_url" class="col-3 col-lg-3 o_form_label"/>
+                            <field name="postiz_api_url" class="oe_inline"/>
+                        </div>
+                        <div class="mt16">
+                            <label for="postiz_api_key" class="col-3 col-lg-3 o_form_label"/>
+                            <field name="postiz_api_key" password="True" class="oe_inline"/>
+                        </div>
+                        <div class="text-muted mt8" style="max-width: 600px;">
+                            <h5>Postiz — Universal Social Media API Proxy</h5>
+                            <p>Postiz acts as a bridge between Odoo and 32+ social media platforms.
+                            Instead of building and maintaining separate API integrations for each platform,
+                            Postiz handles all OAuth, token refresh, rate limiting, and retries.</p>
+
+                            <h5>Setup Instructions</h5>
+                            <ol style="padding-left: 18px; line-height: 1.75;">
+                                <li><strong>Deploy Postiz</strong> (self-hosted) or <strong>sign up</strong> at
+                                    <a href="https://postiz.com" target="_blank">postiz.com</a></li>
+                                <li>Connect your social media accounts in Postiz (LinkedIn, Facebook, Instagram, etc.)</li>
+                                <li>Get your <strong>API Key</strong> from Postiz:
+                                    <em>Settings → Developers → Public API</em></li>
+                                <li>Paste the API key above + the API URL:
+                                    <br/>Cloud: <code>https://api.postiz.com</code>
+                                    <br/>Self-hosted: <code>https://your-postiz-server.com</code></li>
+                                <li>Go to <strong>Social Marketing → Accounts</strong> and click
+                                    <strong>"Sync from Postiz"</strong> to import all connected accounts</li>
+                            </ol>
+
+                            <h5>Supported Platforms (via Postiz)</h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <ul style="padding-left: 18px;">
+                                        <li>LinkedIn (profile + company page)</li>
+                                        <li>Facebook</li>
+                                        <li>Instagram (feed + stories + reels)</li>
+                                        <li>Twitter / X</li>
+                                        <li>YouTube</li>
+                                        <li>TikTok</li>
+                                        <li>Pinterest</li>
+                                        <li>Reddit</li>
+                                        <li>Threads</li>
+                                        <li>Bluesky</li>
+                                        <li>Mastodon</li>
+                                    </ul>
+                                </div>
+                                <div class="col-6">
+                                    <ul style="padding-left: 18px;">
+                                        <li>Discord</li>
+                                        <li>Slack</li>
+                                        <li>Telegram</li>
+                                        <li>Twitch</li>
+                                        <li>Medium</li>
+                                        <li>Dev.to</li>
+                                        <li>Hashnode</li>
+                                        <li>WordPress</li>
+                                        <li>Google My Business</li>
+                                        <li>Dribbble</li>
+                                        <li>+ 10 more</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <p class="mt8"><strong>Compared to direct API + Playwright:</strong>
+                            Postiz eliminates the need for browser automation entirely.
+                            Its provider plugins are maintained by the Postiz open-source community,
+                            so you get platform updates without changing Odoo code.</p>
+                        </div>
+                    </div>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>

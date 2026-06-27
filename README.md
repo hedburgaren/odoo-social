@@ -11,6 +11,7 @@ Social media management for Odoo Community Edition — built by Vertel AB (AGPL-
 | `social_marketing_facebook` | Facebook — Graph API publishing, inbox, stream | No |
 | `social_marketing_instagram` | Instagram — Graph API publishing (2-step), inbox, stream | No |
 | `social_planner` | Communication planning, policy, approval, AI, competitor analysis, unified inbox | No |
+| `social_marketing_postiz` | Postiz bridge — universal API proxy for 32+ platforms | No |
 
 ## Dependencies
 

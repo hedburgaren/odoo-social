@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_social_marketing_account_form_postiz" model="ir.ui.view">
+        <field name="name">social_marketing.account.form.postiz</field>
+        <field name="model">social_marketing.account</field>
+        <field name="inherit_id" ref="social_marketing.social_marketing_account_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <header>
+                    <button name="action_sync_postiz_integrations"
+                            string="Sync from Postiz" type="object"
+                            class="btn-primary"
+                            groups="social_marketing.group_social_marketing_manager"/>
+                </header>
+            </xpath>
+            <xpath expr="//sheet//group[1]" position="after">
+                <group string="Postiz Integration"
+                       attrs="{'invisible': [('postiz_integration_id', '=', False)]}">
+                    <field name="postiz_integration_id" readonly="1"/>
+                    <div class="text-muted">
+                        <p>This account is synced from Postiz. Publishing flows through
+                        the Postiz Public API, which proxies to the actual platform.</p>
+                        <p>To connect more platforms, add them in the Postiz app and
+                        click <strong>"Sync from Postiz"</strong> again.</p>
+                    </div>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
