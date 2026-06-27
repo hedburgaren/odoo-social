@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extend social_marketing account form with LinkedIn auth method and cookie credentials -->
+    <record id="view_social_marketing_account_form_linkedin" model="ir.ui.view">
+        <field name="name">social_marketing.account.form.linkedin</field>
+        <field name="model">social_marketing.account</field>
+        <field name="inherit_id" ref="social_marketing.social_marketing_account_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet//group[1]" position="after">
+                <group string="LinkedIn Settings"
+                       attrs="{'invisible': [('media_type', '!=', 'linkedin')]}">
+                    <group>
+                        <field name="linkedin_auth_method" widget="radio"
+                               attrs="{'invisible': [('id', '=', False)]}"/>
+                    </group>
+                    <group string="Official API" name="linkedin_api_group"
+                           attrs="{'invisible': ['|', ('linkedin_auth_method', '!=', 'api'), ('id', '=', False)]}">
+                        <field name="linkedin_account_urn"/>
+                        <field name="linkedin_access_token" password="True"/>
+                    </group>
+                    <group string="Browser Login (Cookie-based)" name="linkedin_cookie_group"
+                           attrs="{'invisible': ['|', ('linkedin_auth_method', '!=', 'cookie'), ('id', '=', False)]}">
+                        <field name="linkedin_username"/>
+                        <field name="linkedin_password" password="True"/>
+                        <div class="text-muted">
+                            <p>Uses <strong>linkedin-api</strong> library by Tom Quirk.
+                            This method posts as your personal profile without a Developer App.</p>
+                            <p><strong>Security note:</strong> Your password is stored encrypted in the database.
+                            LinkedIn may require CAPTCHA verification if used from a new location —
+                            log in manually at linkedin.com first to verify your account.</p>
+                            <p>Install with: <code>pip install linkedin-api</code></p>
+                        </div>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

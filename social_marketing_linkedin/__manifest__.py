@@ -4,13 +4,17 @@
     'summary': 'Manage your LinkedIn accounts and schedule posts',
     'description': 'Manage your LinkedIn accounts and schedule posts',
     'category': 'Marketing/Social Marketing',
-    'version': '0.1',
+    'version': '0.2',
     'depends': ['social_marketing',],
+    'external_dependencies': {
+        'python': ['linkedin_api'],
+    },
     'data': [
         'data/social_media_data.xml',
         'views/social_marketing_post_template_views.xml',
         'views/social_marketing_linkedin_preview.xml',
         'views/social_marketing_stream_posts_views.xml',
+        'views/social_marketing_account_views.xml',
         'views/res_config_settings_views.xml',
     ],
     'auto_install': True,

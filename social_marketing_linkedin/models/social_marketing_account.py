@@ -20,6 +20,22 @@ class SocialAccountLinkedin(models.Model):
     linkedin_access_token = fields.Char('LinkedIn access token', readonly=True, help='The access token is used to '
                                                                                      'perform request to the REST API')
 
+    # Alternative: Cookie-based auth (linkedin-api library by Tom Quirk)
+    linkedin_auth_method = fields.Selection([
+        ('api', 'Official LinkedIn API'),
+        ('cookie', 'Browser Login (Cookie-based)'),
+    ], string='LinkedIn Auth Method', default='api', required=True,
+        help="""Choose how this account authenticates with LinkedIn:
+- Official LinkedIn API: Uses OAuth 2.0 with a LinkedIn Developer App.
+  Requires App Review. Posts on behalf of a Company Page.
+- Browser Login (Cookie-based): Uses your regular LinkedIn username/password.
+  No Developer App needed. Posts as your personal profile.
+  Supports multiple employees each with their own account.""")
+    linkedin_username = fields.Char('LinkedIn Username',
+        help='Your LinkedIn login email. Only needed for Cookie-based method.')
+    linkedin_password = fields.Char('LinkedIn Password',
+        help='Your LinkedIn login password. Stored encrypted. Only needed for Cookie-based method.')
+
     @api.depends('linkedin_account_urn')
     def _compute_linkedin_account_id(self):
         """Depending on the used LinkedIn endpoint, we sometimes need the full URN, sometimes only the ID part.

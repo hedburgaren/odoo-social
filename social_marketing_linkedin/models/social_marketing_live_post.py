@@ -69,7 +69,14 @@ class SocialLivePostLinkedin(models.Model):
         linkedin_live_posts = self._filter_by_media_types(['linkedin'])
         super(SocialLivePostLinkedin, (self - linkedin_live_posts))._post()
 
-        linkedin_live_posts._post_linkedin()
+        # Split by auth method
+        api_posts = linkedin_live_posts.filtered(
+            lambda p: p.account_id.linkedin_auth_method == 'api')
+        cookie_posts = linkedin_live_posts.filtered(
+            lambda p: p.account_id.linkedin_auth_method == 'cookie')
+
+        api_posts._post_linkedin()
+        cookie_posts._post_linkedin_cookie()
 
     def _post_linkedin(self):
         for live_post in self:
@@ -197,6 +204,116 @@ class SocialLivePostLinkedin(models.Model):
             raise UserError(_("We could not upload your image, try reducing its size and posting it again."))
 
         return image_urn
+
+    def _post_linkedin_cookie(self):
+        """ Post to LinkedIn using cookie-based authentication (linkedin-api library).
+        This uses the unofficial LinkedIn API that simulates a browser session,
+        allowing you to post as your personal profile without a Developer App.
+
+        Requires: pip install linkedin-api
+        Repository: https://github.com/tomquirk/linkedin-api
+        """
+        try:
+            from linkedin_api import Linkedin
+        except ImportError:
+            for live_post in self:
+                live_post.write({
+                    'state': 'failed',
+                    'failure_reason': _(
+                        'linkedin-api library is not installed. '
+                        'Install it with: pip install linkedin-api'
+                    ),
+                })
+            return
+
+        for live_post in self:
+            account = live_post.account_id
+
+            # Validate credentials
+            if not account.linkedin_username or not account.linkedin_password:
+                live_post.write({
+                    'state': 'failed',
+                    'failure_reason': _(
+                        'LinkedIn username and password are required for cookie-based auth. '
+                        'Please configure them in the account settings.'
+                    ),
+                })
+                continue
+
+            try:
+                # Authenticate with LinkedIn
+                api = Linkedin(account.linkedin_username, account.linkedin_password)
+
+                # Post content
+                message = live_post.message or ''
+                image_paths = []
+
+                # Handle images — save to temp files for the library
+                import tempfile
+                import os
+                temp_files = []
+                if live_post.post_id.image_ids:
+                    for image in live_post.post_id.image_ids:
+                        suffix = '.jpg'
+                        if image.mimetype == 'image/png':
+                            suffix = '.png'
+                        elif image.mimetype == 'image/gif':
+                            suffix = '.gif'
+                        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
+                        tmp.write(image.with_context(bin_size=False).raw)
+                        tmp.close()
+                        image_paths.append(tmp.name)
+                        temp_files.append(tmp.name)
+
+                # Post using the library
+                if image_paths:
+                    # LinkedIn library supports posting with images
+                    result = api.post(text=message, media=image_paths if image_paths else None)
+                else:
+                    result = api.post(text=message)
+
+                # Clean up temp files
+                for path in temp_files:
+                    try:
+                        os.unlink(path)
+                    except OSError:
+                        pass
+
+                if result:
+                    post_urn = result if isinstance(result, str) else result.get('id', '')
+                    post_id = post_urn.split(':')[-1] if ':' in post_urn else post_urn
+                    live_post.write({
+                        'state': 'posted',
+                        'failure_reason': False,
+                        'linkedin_post_id': post_id,
+                    })
+                else:
+                    live_post.write({
+                        'state': 'failed',
+                        'failure_reason': _('LinkedIn returned an empty response.'),
+                    })
+
+            except Exception as e:
+                error_msg = str(e)
+                _logger.error("LinkedIn cookie post failed for account %s: %s",
+                             account.display_name, error_msg, exc_info=True)
+
+                live_post.write({
+                    'state': 'failed',
+                    'failure_reason': error_msg[:500],  # Truncate long errors
+                })
+
+                # Check for common errors
+                if 'CHALLENGE' in error_msg.upper() or 'captcha' in error_msg.lower():
+                    live_post.write({
+                        'failure_reason': _(
+                            'LinkedIn requires a security verification (CAPTCHA/challenge). '
+                            'Try logging in manually at linkedin.com first to verify your account, '
+                            'then retry the post.'
+                        ),
+                    })
+                elif 'wrong password' in error_msg.lower() or 'invalid credentials' in error_msg.lower():
+                    account._action_disconnect_accounts(error_msg[:200])
 
     def _format_to_linkedin_little_text(self, input_string):
         """
