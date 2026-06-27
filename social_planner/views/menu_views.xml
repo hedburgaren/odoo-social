@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menu items will be added in Step 1.8 -->
+
+    <!-- Menus for Communication Policy -->
+    <menuitem id="menu_communication_policy"
+              action="action_communication_policy"
+              parent="social_marketing.menu_social_marketing_global"
+              sequence="10"/>
+
+</odoo>

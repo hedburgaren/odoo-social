@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Demo Policy 1: B2B Tech Company - Formal Tone -->
+    <record id="demo_policy_b2b_tech" model="communication.policy">
+        <field name="name">B2B Technology — Formal &amp; Professional</field>
+        <field name="description">
+            Communication policy for a B2B technology company targeting enterprise decision-makers.
+            Professional, authoritative tone with emphasis on thought leadership.
+        </field>
+        <field name="tone_of_voice"><![CDATA[
+<h3>Primary Tone: Professional &amp; Authoritative</h3>
+<ul>
+  <li>Be clear, concise, and factual — avoid emotional language</li>
+  <li>Use data-backed statements whenever possible</li>
+  <li>Third-person or institutional first-person ("we") — never use "I"</li>
+  <li>Avoid slang, internet memes, or overly casual language</li>
+  <li>Technical depth is welcome but always link to deeper resources</li>
+</ul>
+        ]]></field>
+        <field name="brand_voice_guidelines"><![CDATA[
+<h3>Brand Voice Rules</h3>
+<ul>
+  <li><strong>Use:</strong> innovate, transform, optimize, scale, secure, enterprise-grade</li>
+  <li><strong>Avoid:</strong> awesome, cool, revolutionary (without evidence), game-changer</li>
+  <li>Always capitalize product names correctly</li>
+  <li>Use Oxford comma in lists</li>
+  <li>Technical acronyms must be spelled out on first use</li>
+</ul>
+        ]]></field>
+        <field name="hashtag_policy"><![CDATA[
+<h3>Hashtag Rules</h3>
+<ul>
+  <li>Use #EnterpriseTech #DigitalTransformation #B2BTech</li>
+  <li>Maximum 3 hashtags per post</li>
+  <li>Always include at least one branded hashtag: #YourCompanyName</li>
+  <li>No trending/pop-culture hashtags unless directly relevant to B2B tech</li>
+</ul>
+        ]]></field>
+        <field name="posting_frequency_max_daily">3</field>
+        <field name="posting_frequency_max_weekly">12</field>
+        <field name="image_guidelines"><![CDATA[
+<h3>Image Guidelines</h3>
+<ul>
+  <li>Format: 1200x628px for link previews, 1080x1080px for feed posts</li>
+  <li>Brand colors: primary #1A73E8, secondary #34A853</li>
+  <li>Always include meaningful alt-text for accessibility</li>
+  <li>No stock photos of people shaking hands — use real team or product images</li>
+  <li>Logo must appear in bottom-right corner with 20px padding</li>
+</ul>
+        ]]></field>
+        <field name="prohibited_content">
+cheap
+guaranteed savings
+free trial
+hidden costs
+secret
+spam
+fake
+scam
+</field>
+        <field name="approval_chain">[{"role": "creator", "action": "submit"}, {"role": "approver", "action": "approve"}, {"role": "publisher", "action": "publish"}]</field>
+        <field name="response_time_target">120</field>
+        <field name="crisis_response_protocol"><![CDATA[
+<h3>Crisis Response Protocol</h3>
+<ol>
+  <li><strong>Detection:</strong> Monitor keywords + brand mentions every 15 minutes during business hours</li>
+  <li><strong>Classification:</strong> Rate severity 1-5 (1=minor, 5=critical)</li>
+  <li><strong>Level 1-2:</strong> Marketing team responds within 2 hours</li>
+  <li><strong>Level 3-4:</strong> Escalate to Marketing Director + PR — respond within 30 minutes</li>
+  <li><strong>Level 5:</strong> Freeze all scheduled posts. CEO + PR + Legal — respond within 15 minutes</li>
+  <li><strong>Post-crisis:</strong> Review and update policy within 48 hours</li>
+</ol>
+<p>Emergency contacts: marketing-director@company.com, +46 70 123 45 67</p>
+        ]]></field>
+        <field name="state">active</field>
+        <field name="version">1</field>
+    </record>
+
+    <!-- Demo Policy 2: B2C Retail - Warm Tone -->
+    <record id="demo_policy_b2c_retail" model="communication.policy">
+        <field name="name">B2C Retail — Warm &amp; Engaging</field>
+        <field name="description">
+            Communication policy for a B2C retail brand targeting young adults.
+            Warm, engaging, and conversational tone with emphasis on community and lifestyle.
+        </field>
+        <field name="tone_of_voice"><![CDATA[
+<h3>Primary Tone: Warm &amp; Engaging</h3>
+<ul>
+  <li>Be conversational and approachable — write like you're talking to a friend</li>
+  <li>Use inclusive language ("we", "you", "our community")</li>
+  <li>Emojis are encouraged (max 3 per post) 🎉💫✨</li>
+  <li>Ask questions to encourage engagement</li>
+  <li>Share behind-the-scenes content and user stories</li>
+</ul>
+        ]]></field>
+        <field name="brand_voice_guidelines"><![CDATA[
+<h3>Brand Voice Rules</h3>
+<ul>
+  <li><strong>Use:</strong> love, you, together, style, discover, your, share, join</li>
+  <li><strong>Avoid:</strong> buy now, limited time (use "don't miss out" instead), acting superior</li>
+  <li>Always respond to comments within the target response time</li>
+  <li>Use exclamation marks sparingly — one per paragraph max</li>
+  <li>User-generated content must always credit the creator</li>
+</ul>
+        ]]></field>
+        <field name="hashtag_policy"><![CDATA[
+<h3>Hashtag Rules</h3>
+<ul>
+  <li>Use #YourBrandStyle #OOTD (Outfit Of The Day) #SustainableStyle</li>
+  <li>Maximum 5 hashtags per Instagram post, 2 per LinkedIn/Facebook</li>
+  <li>Always include campaign-specific hashtag when applicable</li>
+  <li>Seasonal hashtags: #SummerVibes, #WinterWarmth, etc. (rotate quarterly)</li>
+</ul>
+        ]]></field>
+        <field name="posting_frequency_max_daily">5</field>
+        <field name="posting_frequency_max_weekly">25</field>
+        <field name="image_guidelines"><![CDATA[
+<h3>Image Guidelines</h3>
+<ul>
+  <li>Instagram Stories: 1080x1920px, 9:16 ratio</li>
+  <li>Instagram Feed: 1080x1350px (portrait preferred)</li>
+  <li>Facebook/LinkedIn: 1200x628px for links</li>
+  <li>Brand colors: primary #FF6B6B, secondary #FFE66D</li>
+  <li>All product images must show product on a real person or in context</li>
+  <li>Filter preset: "Warm Light" (+10% warmth, +5% brightness)</li>
+</ul>
+        ]]></field>
+        <field name="prohibited_content">
+diet
+lose weight
+fat
+skinny
+perfect body
+cheap
+discount code leak
+</field>
+        <field name="approval_chain">[{"role": "creator", "action": "submit"}, {"role": "approver", "action": "approve"}]</field>
+        <field name="response_time_target">30</field>
+        <field name="crisis_response_protocol"><![CDATA[
+<h3>Crisis Response Protocol</h3>
+<ol>
+  <li><strong>Detection:</strong> Social media manager monitors brand mentions continuously 09-21</li>
+  <li><strong>Classification:</strong> Rate severity A-C (A=positive buzz, B=minor complaint, C=crisis)</li>
+  <li><strong>Level A-B:</strong> Community manager responds within 30 minutes</li>
+  <li><strong>Level C:</strong> Pause all scheduled posts. Marketing Director + PR within 15 minutes</li>
+  <li><strong>Tone during crisis:</strong> Empathetic, transparent, no corporate-speak</li>
+  <li><strong>Post-crisis:</strong> Send follow-up to affected customers within 24 hours</li>
+</ol>
+        ]]></field>
+        <field name="state">active</field>
+        <field name="version">1</field>
+    </record>
+</odoo>

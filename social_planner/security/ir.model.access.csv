@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_communication_policy_user,communication.policy.user,model_communication_policy,base.group_user,1,0,0,0
+access_communication_policy_manager,communication.policy.manager,model_communication_policy,social_marketing.group_social_marketing_manager,1,1,1,1
+access_communication_policy_creator,communication.policy.creator,model_communication_policy,social_planner.group_social_content_creator,1,1,1,0
