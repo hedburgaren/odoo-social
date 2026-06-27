@@ -17,6 +17,36 @@
                             <label for="instagram_app_secret" class="col-3 col-lg-3 o_form_label"/>
                             <field name="instagram_app_secret" password="True" class="oe_inline"/>
                         </div>
+                        <div class="text-muted mt8" style="max-width: 600px;">
+                            <h5>How to set up Instagram via Facebook App</h5>
+                            <ol style="padding-left: 18px; line-height: 1.75;">
+                                <li>Instagram uses Facebook's Graph API — you <strong>must</strong> set up Facebook first
+                                    (see Facebook Developer Account settings above)</li>
+                                <li>Once your Facebook App is created, add these products in the App Dashboard:
+                                    <ul>
+                                        <li><strong>Instagram Graph API</strong> (for posting, comments, media)</li>
+                                        <li><strong>Instagram Basic Display</strong> (for profile data)</li>
+                                    </ul>
+                                </li>
+                                <li>Convert your Instagram account to a <strong>Business</strong> or <strong>Creator</strong>
+                                    account (Settings → Account → Switch to Professional Account)</li>
+                                <li>Link your Instagram Business account to a Facebook Page
+                                    (Facebook Page Settings → Linked Accounts → Instagram)</li>
+                                <li>Copy the same <strong>Facebook App ID</strong> and <strong>App Secret</strong> here</li>
+                                <li>To find your <strong>Instagram Business Account ID</strong>:
+                                    <br/>→ Go to <a href="https://developers.facebook.com/tools/explorer/" target="_blank">Graph API Explorer</a>
+                                    <br/>→ Select your app → GET <code>/me/accounts?fields=instagram_business_account</code>
+                                    <br/>→ Copy the <code>instagram_business_account.id</code> value and paste it into
+                                    your Instagram account's <em>Instagram Business Account ID</em> field</li>
+                                <li>Generate an access token with: <code>instagram_basic</code>,
+                                    <code>instagram_content_publish</code>, <code>instagram_manage_comments</code>,
+                                    <code>instagram_manage_messages</code></li>
+                                <li>For inbox/messaging: also enable <strong>Pages Messaging</strong> product in your Facebook App</li>
+                            </ol>
+                            <p><strong>Important:</strong> Instagram API requires Facebook <em>App Review</em> and
+                            <em>Business Verification</em> for most permissions. Content publishing via API
+                            is limited to <strong>Business/Creator accounts only</strong> — personal accounts are not supported.</p>
+                        </div>
                     </div>
                 </setting>
             </xpath>

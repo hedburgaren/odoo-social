@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="social_marketing.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//block[hasclass('o_social_marketing_developer_settings')]" position="inside">
-                <setting string="Linkedin Developer Account">
+                <setting string="LinkedIn Developer Account">
                     <field name="linkedin_use_own_account"/>
                     <div class="content-group" invisible="not linkedin_use_own_account">
                         <div class="mt16">
@@ -16,6 +16,28 @@
                         <div class="mt16">
                             <label for="linkedin_client_secret" class="col-3 col-lg-3 o_form_label"/>
                             <field name="linkedin_client_secret" password="True" class="oe_inline"/>
+                        </div>
+                        <div class="text-muted mt8" style="max-width: 600px;">
+                            <h5>How to obtain LinkedIn API Keys</h5>
+                            <ol style="padding-left: 18px; line-height: 1.75;">
+                                <li>Go to <a href="https://developer.linkedin.com/" target="_blank">developer.linkedin.com</a> and log in</li>
+                                <li>Create a new app: <strong>My Apps → Create App</strong></li>
+                                <li>Under <em>Products</em>, request access to:
+                                    <ul>
+                                        <li><strong>Share on LinkedIn</strong> (for posting content)</li>
+                                        <li><strong>Sign In with LinkedIn</strong> using OpenID Connect (for authentication)</li>
+                                        <li><strong>Marketing Developer Platform</strong> (for analytics)</li>
+                                    </ul>
+                                </li>
+                                <li>Copy <strong>Client ID</strong> and <strong>Client Secret</strong> from the <em>Auth</em> tab</li>
+                                <li>Set OAuth 2.0 redirect URL: <code>https://yourdomain.com/social_marketing_linkedin/callback</code></li>
+                                <li>Request the following OAuth scopes:
+                                    <code>openid</code>, <code>profile</code>, <code>email</code>,
+                                    <code>w_member_social</code>, <code>r_organization_social</code>,
+                                    <code>w_organization_social</code></li>
+                            </ol>
+                            <p><strong>Note:</strong> LinkedIn requires <em>Company Page Admin</em> access to post on behalf
+                            of a company. Your app will need to go through LinkedIn's review process for production access.</p>
                         </div>
                     </div>
                 </setting>

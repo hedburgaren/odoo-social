@@ -17,6 +17,24 @@
                             <label for="facebook_app_secret" class="col-3 col-lg-3 o_form_label"/>
                             <field name="facebook_app_secret" password="True" class="oe_inline"/>
                         </div>
+                        <div class="text-muted mt8" style="max-width: 600px;">
+                            <h5>How to obtain Facebook API Keys</h5>
+                            <ol style="padding-left: 18px; line-height: 1.75;">
+                                <li>Go to <a href="https://developers.facebook.com/" target="_blank">developers.facebook.com</a> and log in</li>
+                                <li>Create a new app: <strong>My Apps → Create App → Business</strong></li>
+                                <li>Copy <strong>App ID</strong> and <strong>App Secret</strong> from <em>Settings → Basic</em></li>
+                                <li>Add products: <em>Facebook Login</em> (for authentication),
+                                    <em>Pages Messaging</em> (for inbox/DM),
+                                    <em>Instagram Graph API</em> + <em>Instagram Basic Display</em> (for Instagram posting)</li>
+                                <li>Go to <strong>Graph API Explorer</strong> → select your app → generate a <em>Page Access Token</em>
+                                    with permissions: <code>pages_manage_posts</code>, <code>pages_read_engagement</code>,
+                                    <code>pages_manage_metadata</code>, <code>pages_messaging</code></li>
+                                <li>Set the token in your Facebook account's <em>Page Access Token</em> field
+                                    (under Social Marketing → Accounts)</li>
+                            </ol>
+                            <p><strong>Note:</strong> Your app must be in <em>Live mode</em> (not Development) for production use.
+                            Facebook requires <em>App Review</em> for <code>pages_messaging</code> permission.</p>
+                        </div>
                     </div>
                 </setting>
             </xpath>

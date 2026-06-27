@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Social Planner Settings inheriting from base social_marketing settings -->
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.social.planner</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="social_marketing.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='social_marketing']" position="inside">
+                <block title="Communication Planner" name="social_planner_settings">
+                    <setting string="Default Communication Policy"
+                             help="New communication plans will use this policy by default.">
+                        <field name="social_planner_default_policy_id"/>
+                    </setting>
+                    <setting string="Unified Inbox"
+                             help="How often the system checks connected platforms for new messages.">
+                        <field name="social_planner_inbox_refresh_interval"/>
+                    </setting>
+                    <setting string="AI Features">
+                        <field name="social_planner_ai_enabled"/>
+                        <div class="text-muted" style="max-width: 500px;">
+                            Enable AI-powered content generation, sentiment analysis, and hashtag suggestions.
+                            Requires the <strong>ai_agent</strong> module to be installed and configured with at least one LLM provider.
+                        </div>
+                    </setting>
+                    <setting string="Auto-approve AI Content"
+                             help="When enabled, AI-generated posts skip the approval workflow and are automatically approved.">
+                        <field name="social_planner_auto_approve_ai"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>
