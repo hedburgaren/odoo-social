@@ -1,34 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Extend social_marketing account form with LinkedIn auth method and cookie credentials -->
+    <!-- Extend social_marketing account form with LinkedIn auth methods and credentials -->
     <record id="view_social_marketing_account_form_linkedin" model="ir.ui.view">
         <field name="name">social_marketing.account.form.linkedin</field>
         <field name="model">social_marketing.account</field>
         <field name="inherit_id" ref="social_marketing.social_marketing_account_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//sheet//group[1]" position="after">
-                <group string="LinkedIn Settings"
+                <group string="LinkedIn Authentication"
                        attrs="{'invisible': [('media_type', '!=', 'linkedin')]}">
                     <group>
                         <field name="linkedin_auth_method" widget="radio"
                                attrs="{'invisible': [('id', '=', False)]}"/>
                     </group>
+
+                    <!-- Official API -->
                     <group string="Official API" name="linkedin_api_group"
                            attrs="{'invisible': ['|', ('linkedin_auth_method', '!=', 'api'), ('id', '=', False)]}">
                         <field name="linkedin_account_urn"/>
                         <field name="linkedin_access_token" password="True"/>
                     </group>
-                    <group string="Browser Login (Cookie-based)" name="linkedin_cookie_group"
+
+                    <!-- Cookie-based (linkedin-api) -->
+                    <group string="Browser Login — Cookie-based (linkedin-api)" name="linkedin_cookie_group"
                            attrs="{'invisible': ['|', ('linkedin_auth_method', '!=', 'cookie'), ('id', '=', False)]}">
                         <field name="linkedin_username"/>
                         <field name="linkedin_password" password="True"/>
                         <div class="text-muted">
-                            <p>Uses <strong>linkedin-api</strong> library by Tom Quirk.
-                            This method posts as your personal profile without a Developer App.</p>
-                            <p><strong>Security note:</strong> Your password is stored encrypted in the database.
-                            LinkedIn may require CAPTCHA verification if used from a new location —
-                            log in manually at linkedin.com first to verify your account.</p>
-                            <p>Install with: <code>pip install linkedin-api</code></p>
+                            <p>Uses <strong>linkedin-api</strong> library by Tom Quirk.</p>
+                            <p><strong>Security:</strong> Password stored encrypted. LinkedIn may require
+                            CAPTCHA — log in manually first if blocked.</p>
+                            <p>Install: <code>pip install linkedin-api</code></p>
+                        </div>
+                    </group>
+
+                    <!-- Playwright browser automation -->
+                    <group string="Browser Login — Playwright (Persistent Session)" name="linkedin_playwright_group"
+                           attrs="{'invisible': ['|', ('linkedin_auth_method', '!=', 'playwright'), ('id', '=', False)]}">
+                        <button name="action_open_playwright_login"
+                                string="Open Browser for Login" type="object"
+                                class="btn-primary" icon="fa-chrome"/>
+                        <field name="linkedin_playwright_session"
+                               attrs="{'invisible': [('linkedin_playwright_session', '=', False)]}"/>
+                        <div class="text-muted mt8">
+                            <h5>How Playwright works</h5>
+                            <ol style="padding-left: 18px; line-height: 1.75;">
+                                <li>Click <strong>"Open Browser for Login"</strong> — a Chromium window opens</li>
+                                <li>Log in to LinkedIn manually in that browser (one-time only)</li>
+                                <li>Complete any security checks (CAPTCHA, 2FA)</li>
+                                <li>Once you see your LinkedIn feed, <strong>close the browser window</strong></li>
+                                <li>The session (cookies, localStorage) is saved automatically</li>
+                                <li>All future posts reuse this saved session — no re-login needed</li>
+                            </ol>
+                            <p><strong>Why Playwright?</strong> Uses a real Chromium browser with Persistent Context.
+                            LinkedIn sees real mouse movements and keystrokes — nearly impossible to detect as a bot.
+                            Much more reliable than cookie-based libraries for long-term use.</p>
+                            <p><strong>Requirements:</strong></p>
+                            <code>pip install playwright &amp;&amp; playwright install chromium</code>
+                            <p class="mt8"><strong>Ideal for:</strong> Multiple employees each with their own
+                            persistent browser profile. No Developer App needed.</p>
                         </div>
                     </group>
                 </group>

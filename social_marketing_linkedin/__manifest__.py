@@ -7,7 +7,7 @@
     'version': '0.2',
     'depends': ['social_marketing',],
     'external_dependencies': {
-        'python': ['linkedin_api'],
+        'python': ['linkedin_api', 'playwright'],
     },
     'data': [
         'data/social_media_data.xml',

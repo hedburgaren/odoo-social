@@ -74,9 +74,12 @@ class SocialLivePostLinkedin(models.Model):
             lambda p: p.account_id.linkedin_auth_method == 'api')
         cookie_posts = linkedin_live_posts.filtered(
             lambda p: p.account_id.linkedin_auth_method == 'cookie')
+        playwright_posts = linkedin_live_posts.filtered(
+            lambda p: p.account_id.linkedin_auth_method == 'playwright')
 
         api_posts._post_linkedin()
         cookie_posts._post_linkedin_cookie()
+        playwright_posts._post_linkedin_playwright()
 
     def _post_linkedin(self):
         for live_post in self:
@@ -314,6 +317,186 @@ class SocialLivePostLinkedin(models.Model):
                     })
                 elif 'wrong password' in error_msg.lower() or 'invalid credentials' in error_msg.lower():
                     account._action_disconnect_accounts(error_msg[:200])
+
+    def _post_linkedin_playwright(self):
+        """ Post to LinkedIn using Playwright browser automation.
+        Uses a persistent browser context with saved session state.
+        The user logs in once via action_open_playwright_login(),
+        then subsequent posts reuse the authenticated session.
+
+        Requires: pip install playwright && playwright install chromium
+
+        This is the most robust method against bot detection since
+        it uses a real Chromium browser.
+        """
+        try:
+            from playwright.sync_api import sync_playwright
+        except ImportError:
+            for live_post in self:
+                live_post.write({
+                    'state': 'failed',
+                    'failure_reason': _(
+                        'Playwright is not installed. '
+                        'Run: pip install playwright && playwright install chromium'
+                    ),
+                })
+            return
+
+        import json
+        import tempfile
+        import os
+        import base64
+
+        for live_post in self:
+            account = live_post.account_id
+            session_data = account._load_playwright_session()
+
+            if not session_data:
+                live_post.write({
+                    'state': 'failed',
+                    'failure_reason': _(
+                        'No Playwright session found. Please run "Open Browser Login" '
+                        'from the account settings first to save your LinkedIn session.'
+                    ),
+                })
+                continue
+
+            # Write session to temp file for Playwright
+            session_file = os.path.join(tempfile.gettempdir(),
+                f'linkedin_session_{account.id}.json')
+            with open(session_file, 'w') as f:
+                json.dump(session_data, f)
+
+            try:
+                with sync_playwright() as p:
+                    # Load persistent context with saved session
+                    context = p.chromium.launch_persistent_context(
+                        os.path.expanduser('~/.linkedin_playwright_profile'),
+                        headless=True,
+                        storage_state=session_data,
+                        args=['--no-sandbox', '--disable-setuid-sandbox'],
+                    )
+
+                    page = context.pages[0] if context.pages else context.new_page()
+
+                    # Navigate to feed
+                    page.goto('https://www.linkedin.com/feed/',
+                             wait_until='domcontentloaded', timeout=30000)
+
+                    # Check if we're still logged in
+                    if 'login' in page.url.lower():
+                        live_post.write({
+                            'state': 'failed',
+                            'failure_reason': _(
+                                'LinkedIn session expired. Please run "Open Browser Login" '
+                                'to refresh your session.'
+                            ),
+                        })
+                        context.close()
+                        continue
+
+                    # Click "Start a post" button
+                    try:
+                        page.click('button.share-box-feed-entry__trigger, '
+                                   'button[aria-label="Start a post"]',
+                                   timeout=5000)
+                        page.wait_for_timeout(1000)
+                    except Exception:
+                        # Try alternative selector
+                        try:
+                            page.click('.share-box-feed-entry__closed-share-box', timeout=5000)
+                            page.wait_for_timeout(1000)
+                        except Exception:
+                            pass
+
+                    # Type the message
+                    message = live_post.message or ''
+                    try:
+                        editor = page.locator('.ql-editor, '
+                                             'div[contenteditable="true"], '
+                                             'div[role="textbox"]').first
+                        editor.click()
+                        page.wait_for_timeout(500)
+                        # Type slowly to avoid detection
+                        editor.type(message, delay=50)
+                        page.wait_for_timeout(1000)
+                    except Exception as e:
+                        live_post.write({
+                            'state': 'failed',
+                            'failure_reason': _('Could not type message: %(error)s', error=str(e)[:200]),
+                        })
+                        context.close()
+                        continue
+
+                    # Handle images if present
+                    if live_post.post_id.image_ids:
+                        try:
+                            # Click add image button
+                            page.click('button[aria-label="Add an image"], '
+                                      'li-icon[type="image-icon"]', timeout=5000)
+                            page.wait_for_timeout(1000)
+
+                            # Upload images — one at a time via file input
+                            for image in live_post.post_id.image_ids:
+                                suffix = '.jpg'
+                                if image.mimetype == 'image/png':
+                                    suffix = '.png'
+                                tmp = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
+                                tmp.write(image.with_context(bin_size=False).raw)
+                                tmp_path = tmp.name
+                                tmp.close()
+
+                                # Find file input and upload
+                                file_input = page.locator('input[type="file"]').first
+                                file_input.set_input_files(tmp_path)
+                                page.wait_for_timeout(2000)
+
+                                try:
+                                    os.unlink(tmp_path)
+                                except OSError:
+                                    pass
+
+                            page.wait_for_timeout(2000)
+                        except Exception as e:
+                            _logger.warning("Playwright image upload failed: %s", str(e))
+
+                    # Click "Post" button
+                    try:
+                        page.click('button.share-actions__primary-action, '
+                                  'button[aria-label="Post"]', timeout=5000)
+                        page.wait_for_timeout(3000)
+                    except Exception:
+                        pass
+
+                    # Save updated session state
+                    new_state = context.storage_state()
+                    account.write({
+                        'linkedin_playwright_session':
+                            base64.b64encode(
+                                json.dumps(new_state).encode('utf-8')),
+                    })
+
+                    context.close()
+
+                    # Success — we assume it worked if we didn't get an error
+                    live_post.write({
+                        'state': 'posted',
+                        'failure_reason': False,
+                        'linkedin_post_id': f'playwright_{fields.Datetime.now().strftime("%Y%m%d%H%M%S")}',
+                    })
+
+            except Exception as e:
+                error_msg = str(e)[:500]
+                _logger.error("Playwright post failed: %s", error_msg, exc_info=True)
+                live_post.write({
+                    'state': 'failed',
+                    'failure_reason': _('Playwright error: %(error)s', error=error_msg),
+                })
+            finally:
+                try:
+                    os.unlink(session_file)
+                except OSError:
+                    pass
 
     def _format_to_linkedin_little_text(self, input_string):
         """

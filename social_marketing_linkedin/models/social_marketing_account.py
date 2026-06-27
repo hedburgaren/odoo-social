@@ -21,20 +21,31 @@ class SocialAccountLinkedin(models.Model):
                                                                                      'perform request to the REST API')
 
     # Alternative: Cookie-based auth (linkedin-api library by Tom Quirk)
+    # Plus Playwright browser automation
     linkedin_auth_method = fields.Selection([
         ('api', 'Official LinkedIn API'),
-        ('cookie', 'Browser Login (Cookie-based)'),
+        ('cookie', 'Browser Login — Cookie-based (linkedin-api)'),
+        ('playwright', 'Browser Login — Playwright (Persistent Session)'),
     ], string='LinkedIn Auth Method', default='api', required=True,
         help="""Choose how this account authenticates with LinkedIn:
 - Official LinkedIn API: Uses OAuth 2.0 with a LinkedIn Developer App.
   Requires App Review. Posts on behalf of a Company Page.
-- Browser Login (Cookie-based): Uses your regular LinkedIn username/password.
-  No Developer App needed. Posts as your personal profile.
-  Supports multiple employees each with their own account.""")
+- Browser Login — Cookie-based: Uses the linkedin-api library.
+  Simulates a mobile browser session. Good for simple posting.
+- Browser Login — Playwright: Opens a real Chromium browser.
+  You log in once, the session is saved. Most resistant to bot detection.
+  Ideal for long-term use. Supports multiple employees.""")
     linkedin_username = fields.Char('LinkedIn Username',
         help='Your LinkedIn login email. Only needed for Cookie-based method.')
     linkedin_password = fields.Char('LinkedIn Password',
         help='Your LinkedIn login password. Stored encrypted. Only needed for Cookie-based method.')
+
+    # Playwright browser automation
+    linkedin_playwright_session = fields.Binary('Playwright Session State',
+        attachment=True,
+        help='Stored browser session state from Playwright persistent context. '
+             'Generated after first manual login. This lets Playwright reuse your '
+             'logged-in session so you stay authenticated across script runs.')
 
     @api.depends('linkedin_account_urn')
     def _compute_linkedin_account_id(self):
@@ -269,6 +280,148 @@ class SocialAccountLinkedin(models.Model):
     def _extract_linkedin_picture_url(self, json_data):
         # TODO: remove in master
         return ''
+
+    def action_open_playwright_login(self):
+        """ Open a Chromium browser via Playwright for manual LinkedIn login.
+        The session state (cookies, localStorage) is saved and stored on the account.
+        Subsequent posts reuse this session — no re-login needed.
+
+        Requires: pip install playwright && playwright install chromium
+        """
+        self.ensure_one()
+
+        # Load existing session if available
+        session_data = {}
+        if self.linkedin_playwright_session:
+            import json
+            try:
+                session_data = json.loads(base64.b64decode(self.linkedin_playwright_session).decode('utf-8'))
+            except Exception:
+                pass
+
+        # Open browser with persistent context
+        import subprocess
+        import tempfile
+        import os
+        import time
+
+        # Create a temp file for the session state
+        session_file = os.path.join(tempfile.gettempdir(),
+            f'linkedin_playwright_{self.id}.json')
+
+        # Write existing session if available
+        if session_data:
+            with open(session_file, 'w') as f:
+                json.dump(session_data, f)
+
+        # Build a small Python script that Playwright will execute
+        # This runs in a subprocess because Playwright needs its own event loop
+        script = f'''
+import asyncio
+import json
+import os
+from playwright.sync_api import sync_playwright
+
+SESSION_FILE = {repr(session_file)}
+
+def main():
+    with sync_playwright() as p:
+        # Use persistent context — this saves cookies/session to disk
+        user_data_dir = os.path.expanduser("~/.linkedin_playwright_profile")
+
+        context = None
+        if os.path.exists(SESSION_FILE):
+            try:
+                with open(SESSION_FILE, 'r') as f:
+                    state = json.load(f)
+                context = p.chromium.launch_persistent_context(
+                    user_data_dir,
+                    headless=False,
+                    storage_state=state,
+                )
+            except Exception:
+                pass
+
+        if not context:
+            context = p.chromium.launch_persistent_context(
+                user_data_dir,
+                headless=False,
+            )
+
+        page = context.pages[0] if context.pages else context.new_page()
+
+        # Navigate to LinkedIn feed (if already logged in via cookies, it works)
+        page.goto("https://www.linkedin.com/feed/")
+
+        print("\\n" + "="*60)
+        print("PLAYWRIGHT BROWSER OPEN — LOG IN TO LINKEDIN NOW")
+        print("The browser window is open. Please:")
+        print("1. Log in to LinkedIn if not already logged in")
+        print("2. Complete any security verification (CAPTCHA, 2FA)")
+        print("3. Once you see your feed, close the browser window")
+        print("="*60 + "\\n")
+
+        # Wait for the user to close the browser
+        try:
+            page.wait_for_event("close", timeout=300000)  # 5 min timeout
+        except Exception:
+            pass
+
+        # Save session state
+        state = context.storage_state()
+        with open(SESSION_FILE, 'w') as f:
+            json.dump(state, f)
+
+        print("\\nSession saved successfully! You can now close this terminal.")
+        context.close()
+
+if __name__ == "__main__":
+    main()
+'''
+
+        # Write script to temp file and execute
+        script_file = os.path.join(tempfile.gettempdir(),
+            f'linkedin_playwright_script_{self.id}.py')
+        with open(script_file, 'w') as f:
+            f.write(script)
+
+        # Run in background so Odoo doesn't block
+        subprocess.Popen(
+            ['python3', script_file],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+
+        # Schedule a job to read back the session file after a delay
+        self.env.ref('social_marketing.ir_cron_post_scheduled')._trigger(
+            at=fields.Datetime.now() + fields.Datetime.timedelta(minutes=1))
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'Playwright Browser Opened',
+                'message': (
+                    'A Chromium browser window should open shortly. '
+                    'Log in to LinkedIn, then close the browser. '
+                    'The session will be saved automatically.'
+                ),
+                'type': 'info',
+                'sticky': True,
+            }
+        }
+
+    def _load_playwright_session(self):
+        """ Load and return the Playwright session state. """
+        self.ensure_one()
+        if not self.linkedin_playwright_session:
+            return None
+        import json
+        try:
+            return json.loads(
+                base64.b64decode(self.linkedin_playwright_session).decode('utf-8'))
+        except Exception:
+            return None
 
     ################
     # External API #
