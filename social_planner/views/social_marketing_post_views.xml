@@ -1,4 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Social Marketing Post view extensions will be added in Steps 1.3, 2.3 -->
+    <!-- Extend social_marketing.post form view with plan/policy fields and approval -->
+    <record id="view_social_marketing_post_form_inherit" model="ir.ui.view">
+        <field name="name">social_marketing.post.form.inherit</field>
+        <field name="model">social_marketing.post</field>
+        <field name="inherit_id" ref="social_marketing.social_marketing_post_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Add approval buttons inside existing header -->
+            <xpath expr="//header" position="inside">
+                <button name="action_submit_for_approval" string="Submit for Approval"
+                        type="object" class="btn-primary"
+                        attrs="{'invisible': ['|', ('policy_id', '=', False), ('approval_state', 'not in', ['draft', 'rejected'])]}"
+                        groups="social_planner.group_social_content_creator"/>
+                <button name="action_approve" string="Approve" type="object"
+                        class="btn-success"
+                        attrs="{'invisible': [('approval_state', '!=', 'pending_approval')]}"
+                        groups="social_planner.group_social_content_approver"/>
+                <button name="action_reject" string="Reject" type="object"
+                        class="btn-danger"
+                        attrs="{'invisible': [('approval_state', '!=', 'pending_approval')]}"
+                        groups="social_planner.group_social_content_approver"/>
+                <field name="approval_state" widget="badge"
+                       decoration-success="approval_state == 'approved'"
+                       decoration-warning="approval_state == 'pending_approval'"
+                       decoration-danger="approval_state == 'rejected'"
+                       attrs="{'invisible': [('policy_id', '=', False)]}"/>
+            </xpath>
+
+            <!-- Add plan/policy fields after the header in the sheet -->
+            <xpath expr="//sheet//group[1]" position="before">
+                <div class="alert alert-info" role="alert"
+                     attrs="{'invisible': [('plan_line_id', '=', False)]}">
+                    <strong>Communication Plan:</strong>
+                    <field name="plan_id" readonly="1"/>
+                    ⇒ <field name="plan_line_id" readonly="1"/>
+                    <br/>
+                    <strong>Policy:</strong>
+                    <field name="policy_id" readonly="1"/>
+                    <span attrs="{'invisible': [('compliance_check_passed', '=', True)]}">
+                        <field name="compliance_check_passed" invisible="1"/>
+                        <span class="badge badge-danger">⚠ Compliance issues</span>
+                    </span>
+                    <span attrs="{'invisible': ['|', ('compliance_check_passed', '=', True), ('compliance_warnings', '=', False)]}">
+                        <field name="compliance_warnings" readonly="1"/>
+                    </span>
+                </div>
+            </xpath>
+
+            <!-- Add plan_line_id, reviewer, rejection_reason fields -->
+            <xpath expr="//sheet//notebook" position="inside">
+                <page string="Plan &amp; Policy" name="plan_policy"
+                      attrs="{'invisible': [('plan_line_id', '=', False)]}">
+                    <group>
+                        <group>
+                            <field name="plan_line_id"/>
+                            <field name="reviewer_id"/>
+                        </group>
+                        <group>
+                            <field name="rejection_reason"
+                                   attrs="{'invisible': [('approval_state', '!=', 'rejected')]}"/>
+                            <field name="compliance_check_passed" widget="boolean_toggle"/>
+                            <field name="compliance_warnings"
+                                   attrs="{'invisible': [('compliance_warnings', '=', False)]}"/>
+                        </group>
+                    </group>
+                    <group string="AI Generation" attrs="{'invisible': [('ai_generated', '=', False)]}">
+                        <field name="ai_generated"/>
+                        <field name="ai_prompt"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
 </odoo>

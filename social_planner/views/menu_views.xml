@@ -1,11 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Menu items will be added in Step 1.8 -->
+    <!-- Menus under Social Marketing -->
 
-    <!-- Menus for Communication Policy -->
     <menuitem id="menu_communication_policy"
               action="action_communication_policy"
               parent="social_marketing.menu_social_marketing_global"
-              sequence="10"/>
+              sequence="5"
+              groups="social_marketing.group_social_marketing_manager"/>
+
+    <menuitem id="menu_communication_plan"
+              action="action_communication_plan"
+              parent="social_marketing.menu_social_marketing_global"
+              sequence="15"/>
+
+    <menuitem id="menu_content_calendar"
+              action="action_content_calendar"
+              parent="social_marketing.menu_social_marketing_global"
+              sequence="17"/>
 
 </odoo>

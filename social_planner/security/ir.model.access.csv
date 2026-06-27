@@ -1,4 +1,9 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_communication_policy_user,communication.policy.user,model_communication_policy,base.group_user,1,0,0,0
 access_communication_policy_manager,communication.policy.manager,model_communication_policy,social_marketing.group_social_marketing_manager,1,1,1,1
-access_communication_policy_creator,communication.policy.creator,model_communication_policy,social_planner.group_social_content_creator,1,1,1,0
+access_communication_policy_creator,communication.policy.creator,model_communication_policy,social_planner.group_social_content_creator,1,0,0,0
+access_communication_plan_user,communication.plan.user,model_communication_plan,base.group_user,1,1,1,0
+access_communication_plan_manager,communication.plan.manager,model_communication_plan,social_marketing.group_social_marketing_manager,1,1,1,1
+access_communication_plan_approver,communication.plan.approver,model_communication_plan,social_planner.group_social_content_approver,1,1,1,0
+access_communication_plan_line_user,communication.plan.line.user,model_communication_plan_line,base.group_user,1,1,1,0
+access_communication_plan_line_manager,communication.plan.line.manager,model_communication_plan_line,social_marketing.group_social_marketing_manager,1,1,1,1

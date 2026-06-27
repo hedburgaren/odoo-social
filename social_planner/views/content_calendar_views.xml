@@ -1,4 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Content Calendar views will be added in Step 1.5 -->
+    <!-- Content Calendar — Calendar view for plan lines across all plans -->
+    <record id="view_content_calendar_calendar" model="ir.ui.view">
+        <field name="name">communication.plan.line.calendar</field>
+        <field name="model">communication.plan.line</field>
+        <field name="arch" type="xml">
+            <calendar string="Content Calendar" date_start="date" color="plan_id"
+                      quick_add="1" event_open_popup="1">
+                <field name="theme" string="Title"/>
+                <field name="channel"/>
+                <field name="plan_id"/>
+                <field name="status"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Content Calendar - Search -->
+    <record id="view_content_calendar_search" model="ir.ui.view">
+        <field name="name">communication.plan.line.search</field>
+        <field name="model">communication.plan.line</field>
+        <field name="arch" type="xml">
+            <search string="Search Content Calendar">
+                <field name="theme"/>
+                <field name="plan_id"/>
+                <filter name="planned" string="Planned" domain="[('status','=','planned')]"/>
+                <filter name="in_progress" string="In Progress" domain="[('status','=','in_progress')]"/>
+                <filter name="completed" string="Completed" domain="[('status','=','completed')]"/>
+                <separator/>
+                <filter name="linkedin" string="LinkedIn" domain="[('channel','=','linkedin')]"/>
+                <filter name="facebook" string="Facebook" domain="[('channel','=','facebook')]"/>
+                <filter name="instagram" string="Instagram" domain="[('channel','=','instagram')]"/>
+                <filter name="twitter" string="Twitter/X" domain="[('channel','=','twitter')]"/>
+                <filter name="youtube" string="YouTube" domain="[('channel','=','youtube')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_channel" string="Channel" context="{'group_by':'channel'}"/>
+                    <filter name="group_by_status" string="Status" context="{'group_by':'status'}"/>
+                    <filter name="group_by_content_type" string="Content Type" context="{'group_by':'content_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action for Content Calendar -->
+    <record id="action_content_calendar" model="ir.actions.act_window">
+        <field name="name">Content Calendar</field>
+        <field name="res_model">communication.plan.line</field>
+        <field name="view_mode">calendar,tree,form</field>
+        <field name="search_view_id" ref="view_content_calendar_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No planned content yet</p>
+            <p>
+                The content calendar shows all planned posts across your communication plans.
+                Create a plan first, then add plan lines to populate the calendar.
+            </p>
+        </field>
+    </record>
 </odoo>
