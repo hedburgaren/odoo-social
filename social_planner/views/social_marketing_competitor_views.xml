@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Competitor - Tree View -->
+    <record id="view_social_marketing_competitor_tree" model="ir.ui.view">
+        <field name="name">social_marketing.competitor.tree</field>
+        <field name="model">social_marketing.competitor</field>
+        <field name="arch" type="xml">
+            <tree string="Competitors">
+                <field name="name"/>
+                <field name="competitor_type" widget="badge"/>
+                <field name="media_type" widget="badge"/>
+                <field name="social_handle"/>
+                <field name="follower_count"/>
+                <field name="follower_trend" widget="float_time"
+                       decoration-success="follower_trend > 0"
+                       decoration-danger="follower_trend < 0"/>
+                <field name="engagement_rate"/>
+                <field name="post_frequency_weekly"/>
+                <field name="threat_level" widget="badge"
+                       decoration-success="threat_level == 'low'"
+                       decoration-warning="threat_level == 'medium'"
+                       decoration-danger="threat_level in ['high', 'critical']"/>
+                <field name="last_checked"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Competitor - Form View -->
+    <record id="view_social_marketing_competitor_form" model="ir.ui.view">
+        <field name="name">social_marketing.competitor.form</field>
+        <field name="model">social_marketing.competitor</field>
+        <field name="arch" type="xml">
+            <form string="Competitor">
+                <header>
+                    <button name="action_take_snapshot" string="Take Snapshot" type="object"
+                            class="btn-primary"/>
+                    <button name="action_open_profile" string="Open Profile" type="object"
+                            class="btn-secondary"
+                            attrs="{'invisible': [('profile_url', '=', False)]}"/>
+                    <button name="action_compare" string="Compare" type="object"
+                            class="btn-info"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Competitor Name" required="1"/></h1>
+                        <group name="header_right">
+                            <field name="competitor_type"/>
+                            <field name="threat_level" widget="priority"/>
+                            <field name="user_id"/>
+                        </group>
+                    </div>
+
+                    <group name="main">
+                        <group name="left">
+                            <field name="media_type"/>
+                            <field name="social_handle"/>
+                            <field name="profile_url" widget="url"/>
+                            <field name="tag_ids" widget="many2many_tags"/>
+                        </group>
+                        <group name="right">
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="last_checked"/>
+                            <field name="snapshot_count" string="Snapshots"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Metrics" name="metrics">
+                            <group name="metrics_kpi" string="Latest Metrics">
+                                <group>
+                                    <field name="follower_count"/>
+                                    <field name="follower_trend" widget="float_time"/>
+                                </group>
+                                <group>
+                                    <field name="engagement_rate"/>
+                                    <field name="post_frequency_weekly"/>
+                                </group>
+                            </group>
+                            <group name="metrics_engagement" string="Engagement Breakdown">
+                                <group>
+                                    <field name="avg_likes"/>
+                                    <field name="avg_comments"/>
+                                    <field name="avg_shares"/>
+                                </group>
+                                <group>
+                                    <field name="top_content_theme"/>
+                                </group>
+                            </group>
+                            <group name="metrics_update" string="Quick Update">
+                                <p class="text-muted">
+                                    Use this section to manually update metrics from a recent check.
+                                </p>
+                                <!-- Manual update handled via a planned wizard -->
+                            </group>
+                        </page>
+
+                        <page string="Snapshots" name="snapshots">
+                            <field name="snapshot_ids" nolabel="1">
+                                <tree editable="bottom">
+                                    <field name="snapshot_date"/>
+                                    <field name="follower_count"/>
+                                    <field name="engagement_rate"/>
+                                    <field name="avg_likes"/>
+                                    <field name="avg_comments"/>
+                                    <field name="avg_shares"/>
+                                    <field name="post_frequency_weekly"/>
+                                    <field name="notes"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <page string="Notes &amp; Strategy" name="notes">
+                            <group name="description_group" string="Description">
+                                <field name="description" nolabel="1"
+                                       placeholder="Notes about the competitor's strategy, market position, strengths, weaknesses..."/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Competitor - Pivot View -->
+    <record id="view_social_marketing_competitor_pivot" model="ir.ui.view">
+        <field name="name">social_marketing.competitor.pivot</field>
+        <field name="model">social_marketing.competitor</field>
+        <field name="arch" type="xml">
+            <pivot string="Competitor Comparison" disable_linking="1">
+                <field name="competitor_type" type="col"/>
+                <field name="media_type" type="col"/>
+                <field name="follower_count" type="measure"/>
+                <field name="engagement_rate" type="measure"/>
+                <field name="avg_likes" type="measure"/>
+                <field name="avg_comments" type="measure"/>
+                <field name="avg_shares" type="measure"/>
+                <field name="post_frequency_weekly" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Competitor - Graph View -->
+    <record id="view_social_marketing_competitor_graph" model="ir.ui.view">
+        <field name="name">social_marketing.competitor.graph</field>
+        <field name="model">social_marketing.competitor</field>
+        <field name="arch" type="xml">
+            <graph string="Competitor Comparison" type="bar">
+                <field name="name" type="row"/>
+                <field name="follower_count" type="measure"/>
+                <field name="engagement_rate" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Competitor - Search View -->
+    <record id="view_social_marketing_competitor_search" model="ir.ui.view">
+        <field name="name">social_marketing.competitor.search</field>
+        <field name="model">social_marketing.competitor</field>
+        <field name="arch" type="xml">
+            <search string="Search Competitors">
+                <field name="name"/>
+                <field name="social_handle"/>
+                <field name="tag_ids"/>
+                <filter name="direct" string="Direct Competitors" domain="[('competitor_type','=','direct')]"/>
+                <filter name="indirect" string="Indirect" domain="[('competitor_type','=','indirect')]"/>
+                <filter name="aspirational" string="Aspirational" domain="[('competitor_type','=','aspirational')]"/>
+                <separator/>
+                <filter name="high_threat" string="High Threat" domain="[('threat_level','in',['high','critical'])]"/>
+                <separator/>
+                <filter name="linkedin_f" string="LinkedIn" domain="[('media_type','=','linkedin')]"/>
+                <filter name="instagram_f" string="Instagram" domain="[('media_type','=','instagram')]"/>
+                <filter name="facebook_f" string="Facebook" domain="[('media_type','=','facebook')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_type" string="Type" context="{'group_by':'competitor_type'}"/>
+                    <filter name="group_by_platform" string="Platform" context="{'group_by':'media_type'}"/>
+                    <filter name="group_by_threat" string="Threat Level" context="{'group_by':'threat_level'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Competitor Snapshot - Graph View for Trend Analysis -->
+    <record id="view_social_marketing_competitor_snapshot_graph" model="ir.ui.view">
+        <field name="name">social_marketing.competitor.snapshot.graph</field>
+        <field name="model">social_marketing.competitor.snapshot</field>
+        <field name="arch" type="xml">
+            <graph string="Follower Trends" type="line">
+                <field name="snapshot_date" type="row"/>
+                <field name="follower_count" type="measure"/>
+                <field name="competitor_id" type="col"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_social_marketing_competitor" model="ir.actions.act_window">
+        <field name="name">Competitor Analysis</field>
+        <field name="res_model">social_marketing.competitor</field>
+        <field name="view_mode">tree,pivot,graph,form</field>
+        <field name="search_view_id" ref="view_social_marketing_competitor_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No competitors tracked yet</p>
+            <p>
+                Track your competitors' social media presence — monitor their follower growth,
+                engagement rates, posting frequency, and content strategy over time.
+            </p>
+        </field>
+    </record>
+</odoo>

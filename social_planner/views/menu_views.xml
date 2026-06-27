@@ -30,4 +30,9 @@
               sequence="16"
               groups="social_marketing.group_social_marketing_manager"/>
 
+    <menuitem id="menu_competitor"
+              action="action_social_marketing_competitor"
+              parent="social_marketing.menu_social_marketing_global"
+              sequence="25"/>
+
 </odoo>

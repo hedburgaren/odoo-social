@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Demo Competitors -->
+    <record id="demo_competitor_1" model="social_marketing.competitor">
+        <field name="name">TechCorp AB</field>
+        <field name="media_type">linkedin</field>
+        <field name="social_handle">@techcorp</field>
+        <field name="profile_url">https://linkedin.com/company/techcorp</field>
+        <field name="competitor_type">direct</field>
+        <field name="threat_level">high</field>
+        <field name="follower_count">152000</field>
+        <field name="engagement_rate">3.2</field>
+        <field name="avg_likes">420</field>
+        <field name="avg_comments">35</field>
+        <field name="avg_shares">28</field>
+        <field name="post_frequency_weekly">4.5</field>
+        <field name="top_content_theme">Thought Leadership</field>
+        <field name="description">
+            Direct competitor in enterprise SaaS. Strong LinkedIn presence with regular
+            thought leadership content and case studies.
+        </field>
+    </record>
+
+    <record id="demo_competitor_2" model="social_marketing.competitor">
+        <field name="name">StyleHub Fashion</field>
+        <field name="media_type">instagram</field>
+        <field name="social_handle">@stylehub</field>
+        <field name="profile_url">https://instagram.com/stylehub</field>
+        <field name="competitor_type">aspirational</field>
+        <field name="threat_level">medium</field>
+        <field name="follower_count">890000</field>
+        <field name="engagement_rate">5.8</field>
+        <field name="avg_likes">51000</field>
+        <field name="avg_comments">1200</field>
+        <field name="avg_shares">3400</field>
+        <field name="post_frequency_weekly">12.0</field>
+        <field name="top_content_theme">Influencer Collabs</field>
+        <field name="description">
+            Aspirational brand — we benchmark our Instagram strategy against theirs.
+            Excellent use of influencer partnerships and user-generated content.
+        </field>
+    </record>
+
+    <record id="demo_competitor_3" model="social_marketing.competitor">
+        <field name="name">GreenLiving Co</field>
+        <field name="media_type">facebook</field>
+        <field name="social_handle">@greenlivingco</field>
+        <field name="profile_url">https://facebook.com/greenlivingco</field>
+        <field name="competitor_type">indirect</field>
+        <field name="threat_level">low</field>
+        <field name="follower_count">320000</field>
+        <field name="engagement_rate">2.1</field>
+        <field name="avg_likes">6700</field>
+        <field name="avg_comments">450</field>
+        <field name="avg_shares">890</field>
+        <field name="post_frequency_weekly">7.0</field>
+        <field name="top_content_theme">Sustainability Tips</field>
+        <field name="description">
+            Indirect competitor in the sustainability space. Strong Facebook community.
+            Different target market but overlaps on eco-conscious consumers.
+        </field>
+    </record>
+
+    <!-- Snapshots for TechCorp -->
+    <record id="demo_snapshot_t1" model="social_marketing.competitor.snapshot">
+        <field name="competitor_id" ref="demo_competitor_1"/>
+        <field name="snapshot_date" eval="(datetime.datetime.now() - datetime.timedelta(days=30)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="follower_count">148000</field>
+        <field name="engagement_rate">3.0</field>
+        <field name="avg_likes">390</field>
+        <field name="avg_comments">30</field>
+        <field name="avg_shares">25</field>
+        <field name="post_frequency_weekly">4.0</field>
+    </record>
+
+    <record id="demo_snapshot_t2" model="social_marketing.competitor.snapshot">
+        <field name="competitor_id" ref="demo_competitor_1"/>
+        <field name="snapshot_date" eval="(datetime.datetime.now() - datetime.timedelta(days=15)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="follower_count">150000</field>
+        <field name="engagement_rate">3.1</field>
+        <field name="avg_likes">410</field>
+        <field name="avg_comments">33</field>
+        <field name="avg_shares">27</field>
+        <field name="post_frequency_weekly">4.3</field>
+    </record>
+</odoo>

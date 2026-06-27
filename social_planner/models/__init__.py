@@ -8,4 +8,5 @@ from . import social_marketing_post
 from . import social_marketing_stream_post
 from . import social_marketing_listening_topic
 from . import social_marketing_media_asset
+from . import social_marketing_competitor
 from . import social_planner_ai
