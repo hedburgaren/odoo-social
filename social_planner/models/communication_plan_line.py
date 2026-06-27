@@ -6,8 +6,8 @@ from odoo.exceptions import UserError
 
 
 class CommunicationPlanLine(models.Model):
-    """ En planerad post-rad i en kommunikationsplan. Varje rad representerar
-    en planerad publicering på en specifik kanal med tema och innehållstyp. """
+    """ A planned post row in a communication plan. Each row represents
+    a scheduled publication on a specific channel with theme and content type. """
 
     _name = 'communication.plan.line'
     _description = 'Communication Plan Line'
@@ -17,7 +17,7 @@ class CommunicationPlanLine(models.Model):
         required=True, ondelete='cascade')
     sequence = fields.Integer('Sequence', default=10)
 
-    # Kanal & Innehållstyp
+    # Channel & Content Type
     channel = fields.Selection([
         ('linkedin', 'LinkedIn'),
         ('facebook', 'Facebook'),
@@ -35,16 +35,16 @@ class CommunicationPlanLine(models.Model):
         ('poll', 'Poll'),
     ], string='Content Type', required=True, default='post')
 
-    # Schemaläggning
+    # Scheduling
     date = fields.Date('Date', required=True, default=fields.Date.today)
     time = fields.Float('Time',
-        help="Planerad tid i timmar (ex: 14.5 = 14:30)")
+        help="Scheduled time in hours (e.g. 14.5 = 14:30)")
 
-    # Innehåll
+    # Content
     theme = fields.Char('Theme',
-        help="Tema för posten, t.ex. 'Produktlansering' eller 'Kundcase'.")
+        help="Theme for the post, e.g. 'Product Launch' or 'Customer Case Study'.")
     notes = fields.Text('Notes',
-        help="Interna anteckningar — syns inte i den publicerade posten.")
+        help="Internal notes — not shown in the published post.")
 
     # Status
     status = fields.Selection([
@@ -54,7 +54,7 @@ class CommunicationPlanLine(models.Model):
         ('cancelled', 'Cancelled'),
     ], string='Status', default='planned', required=True, tracking=True)
 
-    # Koppling till poster
+    # Link to posts
     post_ids = fields.One2many('social_marketing.post', 'plan_line_id',
         string='Posts', copy=False)
     post_count = fields.Integer('Number of Posts', compute='_compute_post_count')
@@ -68,16 +68,16 @@ class CommunicationPlanLine(models.Model):
             line.post_count = len(line.post_ids)
 
     def action_create_post(self):
-        """ Skapa en social_marketing.post från denna planeringsrad.
-        Posten förifylls med data från planen och policyn. """
+        """ Create a social_marketing.post from this plan row.
+        The post is pre-filled with data from the plan and policy. """
         self.ensure_one()
 
-        # Hämta policy från planen för compliance check
+        # Get policy from the plan for compliance check
         policy = self.plan_id.policy_id
 
-        # Kör policy compliance check (om policyn är aktiv)
+        # Run policy compliance check (if policy is active)
         if policy.state == 'active':
-            # Kontrollera posting frequency
+            # Check posting frequency
             existing_posts_today = self.env['social_marketing.post'].search_count([
                 ('plan_line_id.plan_id', '=', self.plan_id.id),
                 ('plan_line_id.date', '=', self.date),
@@ -89,7 +89,7 @@ class CommunicationPlanLine(models.Model):
                     max=policy.posting_frequency_max_daily
                 ))
 
-        # Bestäm media_type från channel
+        # Map channel to media_type
         channel_media_map = {
             'linkedin': 'linkedin',
             'facebook': 'facebook',
@@ -98,7 +98,7 @@ class CommunicationPlanLine(models.Model):
             'youtube': 'youtube',
         }
 
-        # Hitta konton för vald kanal
+        # Find accounts for the selected channel
         media_type = channel_media_map.get(self.channel)
         account_ids = self.env['social_marketing.account'].search([
             ('media_type', '=', media_type),
@@ -111,14 +111,13 @@ class CommunicationPlanLine(models.Model):
                 channel=self.channel
             ))
 
-        # Skapa posten
+        # Create the post
         post = self.env['social_marketing.post'].create({
             'plan_line_id': self.id,
             'account_ids': [(6, 0, account_ids.ids)],
-            # Förifyllda fält kommer från template/inherit
         })
 
-        # Uppdatera status
+        # Update status
         self.status = 'in_progress'
 
         return {

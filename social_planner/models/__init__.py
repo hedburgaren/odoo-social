@@ -13,3 +13,5 @@ from . import social_marketing_media_asset
 from . import social_marketing_competitor
 from . import social_marketing_linkedin_inbox
 from . import social_planner_ai
+from . import res_config_settings
+from . import social_planner_dashboard

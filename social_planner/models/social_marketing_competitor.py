@@ -2,12 +2,11 @@
 # Vertel AB AGPL-3
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
 
 
 class SocialMarketingCompetitor(models.Model):
-    """ Konkurrentanalys — spåra och jämför konkurrenters närvaro,
-    tillväxt och engagemang på sociala medier. """
+    """ Competitor analysis — track and compare competitor presence,
+    growth and engagement on social media. """
 
     _name = 'social_marketing.competitor'
     _description = 'Competitor'
@@ -16,10 +15,7 @@ class SocialMarketingCompetitor(models.Model):
 
     name = fields.Char('Competitor Name', required=True)
     active = fields.Boolean('Active', default=True)
-    description = fields.Text('Description',
-        help="Notes about the competitor — market position, target audience, etc.")
 
-    # Platform
     media_type = fields.Selection([
         ('linkedin', 'LinkedIn'),
         ('facebook', 'Facebook'),
@@ -29,24 +25,17 @@ class SocialMarketingCompetitor(models.Model):
         ('tiktok', 'TikTok'),
         ('other', 'Other'),
     ], string='Platform', required=True, default='linkedin')
-    social_handle = fields.Char('Handle / URL',
-        help="Social media handle or profile URL, e.g. '@competitor' or 'https://...'")
+    social_handle = fields.Char('Handle / URL')
     profile_url = fields.Char('Profile URL')
 
-    # Metrics (senaste snapshot)
-    follower_count = fields.Integer('Followers', readonly=True,
-        help="Latest follower count.")
-    follower_trend = fields.Float('Follower Trend %', digits=(3, 1), readonly=True,
-        help="Percentage change in followers since last check.")
-    engagement_rate = fields.Float('Engagement Rate %', digits=(3, 2), readonly=True,
-        help="Estimated engagement rate based on recent posts.")
+    follower_count = fields.Integer('Followers', readonly=True)
+    follower_trend = fields.Float('Follower Trend %', digits=(3, 1), readonly=True)
+    engagement_rate = fields.Float('Engagement Rate %', digits=(3, 2), readonly=True)
     avg_likes = fields.Integer('Avg Likes', readonly=True)
     avg_comments = fields.Integer('Avg Comments', readonly=True)
     avg_shares = fields.Integer('Avg Shares', readonly=True)
-    post_frequency_weekly = fields.Float('Posts/Week', digits=(3, 1), readonly=True,
-        help="Average posts per week over the last 30 days.")
+    post_frequency_weekly = fields.Float('Posts/Week', digits=(3, 1), readonly=True)
 
-    # Kategorisering
     competitor_type = fields.Selection([
         ('direct', 'Direct Competitor'),
         ('indirect', 'Indirect Competitor'),
@@ -59,23 +48,19 @@ class SocialMarketingCompetitor(models.Model):
         ('high', 'High'),
         ('critical', 'Critical'),
     ], string='Threat Level', default='medium')
+    description = fields.Text('Description')
 
-    # Kopplingar
     company_id = fields.Many2one('res.company', string='Company',
         default=lambda self: self.env.company)
     user_id = fields.Many2one('res.users', string='Analyst',
         default=lambda self: self.env.user)
     tag_ids = fields.Many2many('social_marketing.competitor.tag', string='Tags')
 
-    # Historik
     snapshot_ids = fields.One2many('social_marketing.competitor.snapshot',
         'competitor_id', string='Snapshots')
     snapshot_count = fields.Integer('Snapshots', compute='_compute_snapshot_count')
     last_checked = fields.Datetime('Last Checked', readonly=True)
-
-    # Content analys
-    top_content_theme = fields.Char('Top Content Theme', readonly=True,
-        help="Most successful content theme observed.")
+    top_content_theme = fields.Char('Top Content Theme', readonly=True)
 
     @api.depends('snapshot_ids')
     def _compute_snapshot_count(self):
@@ -83,7 +68,6 @@ class SocialMarketingCompetitor(models.Model):
             comp.snapshot_count = len(comp.snapshot_ids)
 
     def action_take_snapshot(self):
-        """ Manuell snapshot — registrera aktuella metrics. """
         self.ensure_one()
         vals = {
             'competitor_id': self.id,
@@ -100,7 +84,6 @@ class SocialMarketingCompetitor(models.Model):
     def action_update_metrics(self, follower_count=0, engagement_rate=0.0,
                                avg_likes=0, avg_comments=0, avg_shares=0,
                                post_frequency=0.0, top_theme=False):
-        """ Uppdatera metrics från manuell inmatning eller API. """
         self.ensure_one()
         old_followers = self.follower_count
         self.write({
@@ -114,30 +97,7 @@ class SocialMarketingCompetitor(models.Model):
             'top_content_theme': top_theme or self.top_content_theme,
             'last_checked': fields.Datetime.now(),
         })
-        # Skapa snapshot
         self.action_take_snapshot()
-
-    def action_open_profile(self):
-        """ Öppna konkurrentens profil i browser. """
-        self.ensure_one()
-        if self.profile_url:
-            return {
-                'type': 'ir.actions.act_url',
-                'url': self.profile_url,
-                'target': 'new',
-            }
-        raise UserError(_('No profile URL set for this competitor.'))
-
-    def action_compare(self):
-        """ Öppna jämförelsevy för valda konkurrenter. """
-        return {
-            'type': 'ir.actions.act_window',
-            'name': _('Competitor Comparison'),
-            'res_model': 'social_marketing.competitor',
-            'view_mode': 'pivot,graph,tree',
-            'domain': [('id', 'in', self.ids)],
-            'target': 'current',
-        }
 
 
 class SocialMarketingCompetitorTag(models.Model):
@@ -150,7 +110,7 @@ class SocialMarketingCompetitorTag(models.Model):
 
 
 class SocialMarketingCompetitorSnapshot(models.Model):
-    """ Historisk snapshot av konkurrent-metrics för trendanalys. """
+    """ Historical snapshot of competitor metrics for trend analysis. """
 
     _name = 'social_marketing.competitor.snapshot'
     _description = 'Competitor Snapshot'

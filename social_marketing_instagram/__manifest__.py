@@ -17,6 +17,7 @@ Requires a Facebook App with Instagram Basic Display and Instagram Graph API:
     """,
     'depends': ['social_marketing', 'social_planner', 'social_marketing_facebook'],
     'data': [
+        'security/ir.model.access.csv',
         'data/social_marketing_media_data.xml',
         'views/social_marketing_post_template_views.xml',
         'views/res_config_settings_views.xml',

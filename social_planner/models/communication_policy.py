@@ -5,9 +5,9 @@ from odoo import _, api, fields, models
 
 
 class CommunicationPolicy(models.Model):
-    """ Kommunikationspolicy — definierar *hur* organisationen kommunicerar.
-    Policyn är grunden som styr all kommunikationsplanering, godkännandeflöden
-    och AI-genererat innehåll. """
+    """ Communication policy — defines *how* the organization communicates.
+    The policy is the foundation that governs all communication planning,
+    approval workflows, and AI-generated content. """
 
     _name = 'communication.policy'
     _description = 'Communication Policy'
@@ -15,43 +15,43 @@ class CommunicationPolicy(models.Model):
 
     name = fields.Char('Policy Name', required=True, translate=True)
     description = fields.Text('Description',
-        help="Övergripande beskrivning av policyns syfte och omfattning.")
+        help="Overall description of the policy's purpose and scope.")
     active = fields.Boolean('Active', default=True)
 
-    # Tonalitet & Varumärkesröst
+    # Tone & Brand Voice
     tone_of_voice = fields.Html('Tone of Voice',
-        help="Riktlinjer för tonalitet — formell, personlig, humoristisk, etc.")
+        help="Guidelines for tone — formal, personal, humorous, etc.")
     brand_voice_guidelines = fields.Html('Brand Voice Guidelines',
-        help="Specifik varumärkesröst — ord att använda/undvika, språkregler, stilguide.")
+        help="Specific brand voice — words to use/avoid, language rules, style guide.")
 
-    # Publiceringsregler
+    # Publication Rules
     hashtag_policy = fields.Html('Hashtag Policy',
-        help="Riktlinjer för hashtag-användning — varumärkesspecifika, bransch, max antal per post.")
+        help="Guidelines for hashtag usage — brand-specific, industry, max per post.")
     posting_frequency_max_daily = fields.Integer('Max Daily Posts',
-        help="Max antal poster per kanal och dag. 0 = ingen gräns.",
+        help="Maximum posts per channel per day. 0 = no limit.",
         default=5)
     posting_frequency_max_weekly = fields.Integer('Max Weekly Posts',
-        help="Max antal poster per kanal och vecka. 0 = ingen gräns.",
+        help="Maximum posts per channel per week. 0 = no limit.",
         default=20)
     image_guidelines = fields.Html('Image Guidelines',
-        help="Riktlinjer för bilder — format, storlek, varumärkesfärger, alt-text-krav.")
+        help="Guidelines for images — format, size, brand colors, alt-text requirements.")
     prohibited_content = fields.Text('Prohibited Content',
-        help="Förbjudna ämnen, ord eller fraser — ett per rad. Poster som innehåller "
-             "dessa flaggas automatiskt.")
+        help="Forbidden topics, words or phrases — one per line. Posts containing "
+             "these are automatically flagged.")
 
-    # Godkännandekedja
+    # Approval Chain
     approval_chain = fields.Json('Approval Chain',
-        help="Stegkedja för godkännande. "
-             "Ex: [{'role': 'creator', 'action': 'submit'}, "
+        help="Step chain for approval. "
+             "Example: [{'role': 'creator', 'action': 'submit'}, "
              "{'role': 'approver', 'action': 'approve'}]")
     response_time_target = fields.Integer('Response Time Target',
-        help="Målsvarstid i minuter för kommentarer/DM.",
+        help="Target response time in minutes for comments/DMs.",
         default=60)
 
-    # Krisprotokoll
+    # Crisis Protocol
     crisis_response_protocol = fields.Html('Crisis Response Protocol',
-        help="Protokoll för krishantering — eskalering, frysta kanaler, svarstider, "
-             "kontaktpersoner.")
+        help="Protocol for crisis management — escalation, channel freeze, "
+             "response times, contact persons.")
 
     # Metadata
     state = fields.Selection([
@@ -60,17 +60,17 @@ class CommunicationPolicy(models.Model):
         ('archived', 'Archived'),
     ], string='Status', default='draft', required=True)
     version = fields.Integer('Version', default=1, readonly=True,
-        help="Versionsnummer. Auto-inkrementeras vid ändring.")
+        help="Version number. Auto-incremented on content change.")
     company_id = fields.Many2one('res.company', string='Company',
         default=lambda self: self.env.company)
     owner_id = fields.Many2one('res.users', string='Owner',
         default=lambda self: self.env.user,
-        help="Ägare/ansvarig för policyn.")
+        help="Owner/responsible for the policy.")
 
-    # Relationer
+    # Relations
     plan_ids = fields.One2many('communication.plan', 'policy_id',
         string='Communication Plans',
-        help="Planer som följer denna policy.")
+        help="Plans that follow this policy.")
     plan_count = fields.Integer('Number of Plans', compute='_compute_plan_count')
 
     @api.depends('plan_ids')
@@ -79,7 +79,7 @@ class CommunicationPolicy(models.Model):
             policy.plan_count = len(policy.plan_ids)
 
     def write(self, vals):
-        """ Auto-inkrementera version vid faktisk ändring av policy-innehåll. """
+        """ Auto-increment version on actual policy content change. """
         policy_fields = [
             'tone_of_voice', 'brand_voice_guidelines', 'hashtag_policy',
             'posting_frequency_max_daily', 'posting_frequency_max_weekly',

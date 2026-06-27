@@ -18,6 +18,7 @@ Requires a Facebook App with:
     """,
     'depends': ['social_marketing', 'social_planner'],
     'data': [
+        'security/ir.model.access.csv',
         'data/social_marketing_media_data.xml',
         'views/social_marketing_post_template_views.xml',
         'views/res_config_settings_views.xml',

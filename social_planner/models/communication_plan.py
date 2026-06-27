@@ -6,8 +6,8 @@ from odoo.exceptions import ValidationError
 
 
 class CommunicationPlan(models.Model):
-    """ Kommunikationsplan — en kampanjnivå-plan som samlar planerade poster
-    över flera kanaler, styrd av en kommunikationspolicy. """
+    """ Communication plan — a campaign-level plan that groups planned posts
+    across multiple channels, governed by a communication policy. """
 
     _name = 'communication.plan'
     _description = 'Communication Plan'
@@ -16,24 +16,24 @@ class CommunicationPlan(models.Model):
 
     name = fields.Char('Plan Name', required=True)
     description = fields.Text('Description',
-        help="Syfte och beskrivning av planen.")
+        help="Purpose and description of the plan.")
     active = fields.Boolean('Active', default=True)
 
-    # Koppling till policy
+    # Policy link
     policy_id = fields.Many2one('communication.policy', string='Communication Policy',
         required=True, ondelete='restrict', tracking=True,
-        help="Policyn som definierar tonalitet, regler och godkännandekedja.")
+        help="The policy defining tone, rules and approval chain.")
     policy_state = fields.Selection(related='policy_id.state', string='Policy Status')
 
-    # Tidsram
+    # Timeframe
     start_date = fields.Date('Start Date', required=True, default=fields.Date.today)
     end_date = fields.Date('End Date', required=True)
 
-    # Mål & Målgrupp
+    # Goals & Audience
     goal = fields.Text('Goal',
-        help="Mätbara mål för planen (ex: öka räckvidd med 25%, generera 50 leads).")
+        help="Measurable goals for the plan (e.g. increase reach by 25%, generate 50 leads).")
     target_audience = fields.Text('Target Audience',
-        help="Beskrivning av målgruppen för denna plan.")
+        help="Description of the target audience for this plan.")
 
     # Status
     state = fields.Selection([
@@ -43,7 +43,7 @@ class CommunicationPlan(models.Model):
         ('archived', 'Archived'),
     ], string='Status', default='draft', required=True, tracking=True)
     color = fields.Integer('Color', default=0,
-        help="Färg för kalender-visning.")
+        help="Color for calendar display.")
 
     # Metadata
     company_id = fields.Many2one('res.company', string='Company',
@@ -51,7 +51,7 @@ class CommunicationPlan(models.Model):
     user_id = fields.Many2one('res.users', string='Responsible',
         default=lambda self: self.env.user, tracking=True)
 
-    # Rader
+    # Lines
     line_ids = fields.One2many('communication.plan.line', 'plan_id',
         string='Plan Lines', copy=True)
     line_count = fields.Integer('Number of Lines', compute='_compute_line_count')

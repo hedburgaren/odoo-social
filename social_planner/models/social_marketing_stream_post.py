@@ -5,8 +5,8 @@ from odoo import _, api, fields, models
 
 
 class SocialMarketingStreamPost(models.Model):
-    """ Ärv social_marketing.stream.post för AI-sentimentanalys
-    och auto-moderation kopplat till policy. """
+    """ Extend social_marketing.stream.post for AI sentiment analysis
+    and auto-moderation linked to policy. """
 
     _inherit = 'social_marketing.stream.post'
 
@@ -15,15 +15,11 @@ class SocialMarketingStreamPost(models.Model):
         ('neutral', 'Neutral'),
         ('negative', 'Negative'),
     ], string='Sentiment', default='neutral', tracking=True)
-    sentiment_score = fields.Float('Sentiment Score', digits=(3, 2),
-        help="AI sentiment score: 0.0 (very negative) → 1.0 (very positive).")
-    needs_review = fields.Boolean('Needs Review',
-        help="Flagged for manual review (negative sentiment, potential crisis).")
-    policy_flag = fields.Boolean('Policy Flag',
-        help="Content flagged by communication policy rules (crisis keywords, etc.).")
+    sentiment_score = fields.Float('Sentiment Score', digits=(3, 2))
+    needs_review = fields.Boolean('Needs Review')
+    policy_flag = fields.Boolean('Policy Flag')
 
     def action_analyze_sentiment(self):
-        """ Analysera sentiment för detta stream-post-meddelande. """
         ai_helper = self.env['social.planner.ai']
         for post in self:
             message = post.message or ''
@@ -37,7 +33,6 @@ class SocialMarketingStreamPost(models.Model):
             })
 
     def action_check_policy(self):
-        """ Kontrollera om stream-posten flaggas av någon aktiv policy. """
         policies = self.env['communication.policy'].search([
             ('state', '=', 'active'),
             ('prohibited_content', '!=', False),
