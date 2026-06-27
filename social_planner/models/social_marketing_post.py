@@ -59,20 +59,61 @@ class SocialMarketingPost(models.Model):
             self.compliance_warnings = False
             self.compliance_check_passed = True
 
-        # Bestäm reviewer från policy
-        if self.policy_id and self.policy_id.approval_chain:
-            # TODO: Implementera reviewer-assignment från approval_chain JSON
-            pass
+        # Bestäm reviewer från policy.approval_chain
+        self._assign_reviewer_from_policy()
 
         self.approval_state = 'pending_approval'
 
         # Notifiera reviewer via activity
         if self.reviewer_id:
             self.activity_schedule(
-                'social_planner.mail_activity_approval',
+                'mail.mail_activity_data_todo',
                 user_id=self.reviewer_id.id,
-                note=_('Please review and approve/reject this social media post.')
+                note=_('Please review and approve/reject the social media post "%(post)s" for plan "%(plan)s".',
+                       post=self.display_name, plan=self.plan_id.name)
             )
+        # Notifiera creator via chatter
+        self.message_post(
+            body=_('Post submitted for approval. Reviewer: %(reviewer)s',
+                   reviewer=self.reviewer_id.name if self.reviewer_id else 'Not assigned'),
+            message_type='notification',
+            subtype_xmlid='mail.mt_comment')
+
+    def _assign_reviewer_from_policy(self):
+        """ Tilldela reviewer baserat på policy.approval_chain JSON.
+        Exempel på approval_chain:
+        [{"role": "creator", "action": "submit"},
+         {"role": "approver", "action": "approve", "user_id": 3}]
+        Om user_id är specificerad, används den. Annars söks användare med approver-gruppen."""
+        self.ensure_one()
+        if not self.policy_id or not self.policy_id.approval_chain:
+            return
+
+        import json
+        try:
+            chain = self.policy_id.approval_chain
+            if isinstance(chain, str):
+                chain = json.loads(chain)
+        except (json.JSONDecodeError, TypeError):
+            return
+
+        if not isinstance(chain, list):
+            return
+
+        # Hitta approver-steget
+        for step in chain:
+            if isinstance(step, dict) and step.get('role') == 'approver':
+                if step.get('user_id'):
+                    self.reviewer_id = step['user_id']
+                    return
+                # Annars hitta första användaren med approver-gruppen
+                approver = self.env['res.users'].search([
+                    ('groups_id', 'in', self.env.ref('social_planner.group_social_content_approver').id),
+                    ('share', '=', False),
+                ], limit=1)
+                if approver:
+                    self.reviewer_id = approver.id
+                return
 
     def action_approve(self):
         """ Godkänn posten — den kan nu publiceras. """
@@ -80,6 +121,12 @@ class SocialMarketingPost(models.Model):
         if self.approval_state != 'pending_approval':
             raise UserError(_('Only posts pending approval can be approved.'))
         self.approval_state = 'approved'
+        self.message_post(
+            body=_('Post approved by %(user)s.', user=self.env.user.name),
+            message_type='notification',
+            subtype_xmlid='mail.mt_comment')
+        # Markera aktiviteten som klar
+        self.activity_feedback(['mail.mail_activity_data_todo'])
 
     def action_reject(self, reason=False):
         """ Avvisa posten — tillbaka till draft med kommentar. """
@@ -89,6 +136,15 @@ class SocialMarketingPost(models.Model):
         self.approval_state = 'rejected'
         if reason:
             self.rejection_reason = reason
+        self.message_post(
+            body=_('Post rejected by %(user)s. Reason: %(reason)s',
+                   user=self.env.user.name,
+                   reason=self.rejection_reason or 'No reason provided'),
+            message_type='notification',
+            subtype_xmlid='mail.mt_comment',
+            partner_ids=[self.create_uid.partner_id.id])
+        # Markera aktiviteten som klar
+        self.activity_feedback(['mail.mail_activity_data_todo'])
 
     def action_post(self):
         """ Överskugga action_post för att kräva godkännande (om policyn kräver det). """
