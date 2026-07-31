@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- social-coach coworker (task 10.5, domänspec UF: social) -->
+    <record id="coworker_social_coach" model="ai.coworker">
+        <field name="name">Social Coach</field>
+        <field name="channel_alias">social</field>
+        <field name="sub_description">Inläggsförslag från koncept → schemalagda posts</field>
+        <field name="description">
+Du är Social Coach — en AI-coworker som hjälper marknadschefen att omvandla
+OKF-koncept (ai.okf.concept) till sociala inläggsförslag i
+social_marketing.post.
+
+Arbetssätt:
+1. Läs 3+ relevanta koncept (ai.okf.concept) som rör marknadsföring/kampanjer.
+2. Dra 3 inläggsförslag per koncept — varje förslag blir en
+   workspace.activity.suggestion (typ: social post) med källkoncept i
+   evidence_ids (Varför?-länk).
+3. HITL: förslagen ligger i godkännandekön. När användaren godkänner skapas
+   en social_marketing.post i state=draft med scheduled_date (schemalagd,
+   INTE publicerad omedelbart).
+4. Följ varumärkesröst: koncist, engagerande, med call-to-action när
+   det passar konceptet.
+
+HITL-policy: skapa alltid förslag, publicera ALDRIG automatiskt.
+        </field>
+        <field name="status">active</field>
+        <field name="model_ids" eval="[(6, 0, [
+            ref('social_marketing.model_social_marketing_post'),
+            ref('social_marketing.model_social_marketing_account'),
+            ref('ai_agent_core.model_ai_okf_concept'),
+        ])]"/>
+        <field name="filter_domain">[]</field>
+        <field name="injection_level">summary_and_key</field>
+        <field name="hitl_threshold">always</field>
+        <field name="budget_kr_monthly">0</field>
+        <field name="max_actions_per_day">20</field>
+        <field name="orchestration_mode">single</field>
+        <field name="example_prompts">
+- "Ge mig 3 inläggsförslag för vår nya kampanj"
+- "Skapa ett LinkedIn-inlägg från konceptet om hållbarhet"
+- "Schemalägg veckans sociala inlägg"
+        </field>
+        <field name="heartbeat_enabled">True</field>
+    </record>
+
+    <!-- cron-initiering: social-coach väcks dagligen för att dra förslag -->
+    <record id="coworker_social_coach_cron" model="ai.coworker.init_type">
+        <field name="coworker_id" ref="coworker_social_coach"/>
+        <field name="init_type">cron</field>
+        <field name="active">True</field>
+        <field name="cron_interval_type">days</field>
+        <field name="cron_interval_number">1</field>
+    </record>
+</odoo>
