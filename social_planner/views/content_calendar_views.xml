@@ -45,7 +45,7 @@
     <record id="action_content_calendar" model="ir.actions.act_window">
         <field name="name">Content Calendar</field>
         <field name="res_model">communication.plan.line</field>
-        <field name="view_mode">calendar,tree,form</field>
+        <field name="view_mode">calendar,list,form</field>
         <field name="search_view_id" ref="view_content_calendar_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">No planned content yet</p>

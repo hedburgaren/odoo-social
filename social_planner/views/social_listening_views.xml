@@ -44,7 +44,7 @@
     <record id="action_social_listening_topic" model="ir.actions.act_window">
         <field name="name">Listening Topics</field>
         <field name="res_model">social_marketing.listening.topic</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <!-- Social Media Asset - Tree View -->
@@ -94,6 +94,6 @@
     <record id="action_social_media_asset" model="ir.actions.act_window">
         <field name="name">Media Assets</field>
         <field name="res_model">social_marketing.media.asset</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 </odoo>

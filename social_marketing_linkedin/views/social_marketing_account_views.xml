@@ -8,22 +8,22 @@
         <field name="arch" type="xml">
             <xpath expr="//sheet//group[1]" position="after">
                 <group string="LinkedIn Authentication"
-                       attrs="{'invisible': [('media_type', '!=', 'linkedin')]}">
+                       invisible="media_type != 'linkedin'">
                     <group>
                         <field name="linkedin_auth_method" widget="radio"
-                               attrs="{'invisible': [('id', '=', False)]}"/>
+                               invisible="id == False"/>
                     </group>
 
                     <!-- Official API -->
                     <group string="Official API" name="linkedin_api_group"
-                           attrs="{'invisible': ['|', ('linkedin_auth_method', '!=', 'api'), ('id', '=', False)]}">
+                           invisible="linkedin_auth_method != 'api' or id == False">
                         <field name="linkedin_account_urn"/>
                         <field name="linkedin_access_token" password="True"/>
                     </group>
 
                     <!-- Cookie-based (linkedin-api) -->
                     <group string="Browser Login — Cookie-based (linkedin-api)" name="linkedin_cookie_group"
-                           attrs="{'invisible': ['|', ('linkedin_auth_method', '!=', 'cookie'), ('id', '=', False)]}">
+                           invisible="linkedin_auth_method != 'cookie' or id == False">
                         <field name="linkedin_username"/>
                         <field name="linkedin_password" password="True"/>
                         <div class="text-muted">
@@ -36,12 +36,12 @@
 
                     <!-- Playwright browser automation -->
                     <group string="Browser Login — Playwright (Persistent Session)" name="linkedin_playwright_group"
-                           attrs="{'invisible': ['|', ('linkedin_auth_method', '!=', 'playwright'), ('id', '=', False)]}">
+                           invisible="linkedin_auth_method != 'playwright' or id == False">
                         <button name="action_open_playwright_login"
                                 string="Open Browser for Login" type="object"
                                 class="btn-primary" icon="fa-chrome"/>
                         <field name="linkedin_playwright_session"
-                               attrs="{'invisible': [('linkedin_playwright_session', '=', False)]}"/>
+                               invisible="linkedin_playwright_session == False"/>
                         <div class="text-muted mt8">
                             <h5>How Playwright works</h5>
                             <ol style="padding-left: 18px; line-height: 1.75;">

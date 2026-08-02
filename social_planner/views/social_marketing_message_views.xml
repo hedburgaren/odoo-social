@@ -218,7 +218,7 @@
     <record id="action_social_marketing_message" model="ir.actions.act_window">
         <field name="name">Unified Inbox</field>
         <field name="res_model">social_marketing.message</field>
-        <field name="view_mode">kanban,tree,pivot,form</field>
+        <field name="view_mode">kanban,list,pivot,form</field>
         <field name="search_view_id" ref="view_social_marketing_message_search"/>
         <field name="context">{'search_default_unread': 1}</field>
         <field name="help" type="html">
