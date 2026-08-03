@@ -47,7 +47,7 @@ HITL-policy: skapa alltid förslag, publicera ALDRIG automatiskt.
     <record id="coworker_social_coach_cron" model="ai.coworker.init_type">
         <field name="coworker_id" ref="coworker_social_coach"/>
         <field name="init_type">cron</field>
-        <field name="active">True</field>
+        <field name="enabled">True</field>
         <field name="cron_interval_type">days</field>
         <field name="cron_interval_number">1</field>
     </record>
