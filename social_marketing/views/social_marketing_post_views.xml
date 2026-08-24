@@ -277,28 +277,5 @@
         </field>
     </record>
 
-    <record id="social_marketing_post_view_form_pipeline" model="ir.ui.view">
-        <field name="name">social_marketing.post.view.form.pipeline</field>
-        <field name="model">social_marketing.post</field>
-        <field name="inherit_id" ref="social_marketing.social_marketing_post_view_form"/>
-        <field name="arch" type="xml">
-            <xpath expr="//sheet" position="inside">
-                <group string="Publishing Pipeline" name="publish_pipeline"
-                       invisible="not pipeline_step_ids">
-                    <field name="pipeline_step_ids" readonly="1">
-                        <list>
-                            <field name="create_date"/>
-                            <field name="stage"/>
-                            <field name="state"/>
-                            <field name="live_post_id"/>
-                            <field name="policy_version"/>
-                            <field name="user_id"/>
-                            <field name="result"/>
-                        </list>
-                    </field>
-                </group>
-            </xpath>
-        </field>
-    </record>
-</data>
+    </data>
 </odoo>
