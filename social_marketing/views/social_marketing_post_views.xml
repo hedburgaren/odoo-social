@@ -107,7 +107,7 @@
         <field name="model">social_marketing.post</field>
         <field name="arch" type="xml">
             <search>
-                <field name="message" string="Post Message"/>
+                <field name="message_plain" string="Post Message"/>
                 <field name="create_uid" string="Published By"/>
                 <field name="utm_campaign_id" string="Campaign"/>
                 <field name="company_id" groups="base.group_multi_company"/>
@@ -153,7 +153,7 @@
         <field name="arch" type="xml">
             <list decoration-info="state == 'draft'">
                 <field name="account_ids" widget="many2many_tags" />
-                <field name="message" />
+                <field name="message_plain" />
                 <field name="state" decoration-info="state == 'draft'" decoration-warning="state == 'posting'" decoration-success="state == 'scheduled' or state == 'posted'" widget="badge"/>
             </list>
         </field>

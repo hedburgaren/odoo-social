@@ -168,13 +168,13 @@ class SocialMarketingPost(models.Model):
         policy = self.policy_id
 
         # 1. Check prohibited_content
-        if policy.prohibited_content and self.message:
+        if policy.prohibited_content and self.message_plain:
             prohibited_words = [
                 w.strip().lower()
                 for w in policy.prohibited_content.split('\n')
                 if w.strip()
             ]
-            message_lower = self.message.lower()
+            message_lower = self.message_plain.lower()
             found_words = [w for w in prohibited_words if w in message_lower]
             if found_words:
                 warnings.append(_(
@@ -243,17 +243,17 @@ class SocialMarketingPost(models.Model):
         ai_helper = self.env['social.planner.ai']
         hashtags = ai_helper.suggest_hashtags(self.id)
         if hashtags:
-            current = self.message or ''
+            current = self.message_plain or ''
             new_message = current + '\n\n' + ' '.join(hashtags)
             self.write({'message': new_message})
 
     def action_ai_analyze_sentiment(self):
         """ Analyze sentiment for post content. """
         self.ensure_one()
-        if not self.message:
+        if not self.message_plain:
             return
         ai_helper = self.env['social.planner.ai']
-        result = ai_helper.analyze_sentiment(self.message)
+        result = ai_helper.analyze_sentiment(self.message_plain)
         self.message_post(
             body=_('AI Sentiment Analysis: %(sentiment)s (score: %(score).2f)',
                    sentiment=result['sentiment'], score=result['score']),

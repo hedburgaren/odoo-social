@@ -96,8 +96,8 @@ class SocialPlannerAI(models.AbstractModel):
             if line.notes:
                 parts.append(f"Additional notes: {line.notes}")
 
-        if post and post.message:
-            parts.append(f"Draft content to refine: {post.message}")
+        if post and post.message_plain:
+            parts.append(f"Draft content to refine: {post.message_plain}")
 
         parts.append("Write engaging, platform-appropriate content ready to post.")
         parts.append("Include relevant emojis if the brand voice allows it.")
@@ -200,7 +200,7 @@ class SocialPlannerAI(models.AbstractModel):
     def suggest_hashtags(self, post_id):
         """ Föreslå hashtags baserat på innehåll och policy. """
         post = self.env['social_marketing.post'].browse(post_id)
-        if not post.exists() or not post.message:
+        if not post.exists() or not post.message_plain:
             return []
 
         system_prompt = (
@@ -209,7 +209,7 @@ class SocialPlannerAI(models.AbstractModel):
             "Respond with ONLY a JSON array: [\"#tag1\", \"#tag2\", ...]"
         )
 
-        user_prompt = f"Content: {post.message}\n"
+        user_prompt = f"Content: {post.message_plain}\n"
         if post.policy_id and post.policy_id.hashtag_policy:
             user_prompt += f"Hashtag rules: {post.policy_id.hashtag_policy}"
 

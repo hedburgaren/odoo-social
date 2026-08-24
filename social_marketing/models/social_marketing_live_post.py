@@ -39,13 +39,13 @@ class SocialLivePost(models.Model):
     company_id = fields.Many2one('res.company', 'Company', related='account_id.company_id')
 
     @api.depends(lambda self:
-        ['post_id.message', 'post_id.utm_campaign_id', 'account_id.media_type', 'account_id.utm_medium_id', 'post_id.source_id'] +
+        ['post_id.message', 'post_id.message_plain', 'post_id.utm_campaign_id', 'account_id.media_type', 'account_id.utm_medium_id', 'post_id.source_id'] +
         ['post_id.%s' % field for field in self.env['social_marketing.post']._get_post_message_modifying_fields()])
     def _compute_message(self):
         """ Prepares the message of the parent post, and shortens links to contain UTM data. """
         for live_post in self:
             message = self.env['mail.render.mixin'].sudo()._shorten_links_text(
-                live_post.post_id.message,
+                live_post.post_id.message_plain,
                 live_post._get_utm_values())
 
             live_post.message = self.env['social_marketing.post']._prepare_post_content(

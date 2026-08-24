@@ -12,7 +12,7 @@
         <field name="model">social_marketing.post.template</field>
         <field name="arch" type="xml">
             <list>
-                <field name="message"/>
+                <field name="message_plain"/>
             </list>
         </field>
     </record>
@@ -32,10 +32,9 @@
                                 invisible="has_active_accounts">
                                 <p><a href="/odoo/action-social_marketing.action_social_marketing_media">Link social accounts</a> before posting.</p>
                             </div>
-                            <field name="message" widget="text_emojis" class="o_social_marketing_post_message_wrapper"
-                                onchange_on_keydown="True" force_save="1" default_focus="1"
-                                readonly="not has_active_accounts"
+                            <field name="message" widget="html" class="o_social_marketing_post_message_wrapper"
                                 placeholder="Write a message or upload an image"
+                                readonly="not has_active_accounts"
                                 invisible="is_split_per_media"/>
                             <field name="image_ids" widget="many2many_binary"
                                 class="o_social_marketing_post_form_attachments"
