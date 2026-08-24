@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Vertel AB AGPL-3
+# Vertel Sverige AB AGPL-3
 
 import json
 import threading
@@ -27,6 +27,19 @@ class SocialPost(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin', 'utm.source.mixin', 'social_marketing.post.template']  #
     _description = 'Social Post'
     _order = 'create_date desc'
+    # NOTE: _rec_name must be set on THIS class, not only on the template.
+    # The template's `_rec_name = 'message'` is a class attribute that is NOT
+    # inherited when the template is referenced by name in `_inherit` (Python
+    # MRO only includes actual base classes). Without it, utm.source.mixin's
+    # `name` field makes Odoo fall back to `_rec_name = 'name'`, and the mixin
+    # then generates the utm source name from the wrong field — programmatic
+    # creation (AI/Social Coach, tests) crashes with a null `utm_source.name`.
+    _rec_name = 'message'
+
+    pipeline_step_ids = fields.One2many(
+        'social.publish.pipeline.step', 'post_id',
+        string='Publishing Pipeline Log', readonly=True,
+        help='Audit trail of the post publishing pipeline stages.')
 
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -185,6 +198,15 @@ class SocialPost(models.Model):
         """Every post will have a unique corresponding utm.source for statistics computation purposes.
         This way, it will be possible to see every leads/quotations generated through a particular post."""
 
+        # Validate the message up front: the utm.source.mixin creates the
+        # source inside the super chain, before the _check_message_not_empty
+        # constraint can run. Without this guard an empty message would crash
+        # on the utm_source.name NOT NULL constraint instead of raising the
+        # proper UserError.
+        for vals in vals_list:
+            if not (vals.get('message') or '').strip():
+                raise UserError(_("The 'message' field is required for post ID."))
+
         # if a scheduled_date / published_date is specified, it should be the one used as the calendar date
         # this is normally handled by the `_compute_calendar_date` but in create mode,
         # it is not called when a default value for the calendar_date field is passed
@@ -269,41 +291,69 @@ class SocialPost(models.Model):
         ]
         return action
 
-    def _action_post(self):
-        """ Called when the post is published on its social_marketing.accounts.
-        It will create one social_marketing.live.post per social_marketing.account and call '_post' on each of them. """
+    def _pipeline_log(self, stage, state='done', result=None, live_post_id=None):
+        """ Create an audit step record for the post (system-level, sudo).
 
+        policy_id is optional: it only exists when social_planner is installed,
+        so it is read defensively. """
+        self.ensure_one()
+        policy = self.policy_id if 'policy_id' in self._fields else False
+        self.env['social.publish.pipeline.step'].sudo().create({
+            'post_id': self.id,
+            'live_post_id': live_post_id.id if live_post_id else False,
+            'stage': stage,
+            'state': state,
+            'result': result or False,
+            'policy_version': policy.version if policy else False,
+        })
+
+    def _action_post(self):
+        """ Dispatch each live post through the job queue (queue_job).
+
+        Replaces the synchronous loop: one queue.job per live post, workers
+        claim jobs with FOR UPDATE SKIP LOCKED (safe in HA), retry/backoff on
+        transient errors, per-media rate limiting. The post is only completed
+        once all live posts are terminal (published or failed). """
         for post in self:
             post.write({
                 'state': 'posting',
                 'published_date': fields.Datetime.now(),
                 'live_post_ids': [
                     (0, 0, live_post)
-                    for live_post in post._prepare_live_post_values()]
+                    for live_post in post._prepare_live_post_values()],
             })
+
+        # One pending pipeline step per live post, created before commit so
+        # the steps persist together with the live posts.
+        step_by_live = {}
+        for post in self:
+            for live_post in post.live_post_ids:
+                step = self.env['social.publish.pipeline.step'].sudo().create({
+                    'post_id': post.id,
+                    'live_post_id': live_post.id,
+                    'stage': 'dispatched',
+                    'state': 'pending',
+                })
+                step_by_live[live_post.id] = step
 
         if not getattr(threading.current_thread(), 'testing', False):
             # If there's a link in the message, the Facebook / Twitter API will fetch it
-            # to build a preview. But when posting, the SQL transaction will not
-            # yet be committed, and so the link tracker associated to this link
-            # will not yet exist for the Facebook API and the preview will be
-            # broken. So we force the compute of the message field and therefor the
-            # creation of the link trackers (flush will compute only stored fields).
+            # to build a preview. The link tracker must exist before the job runs,
+            # so flush and commit before enqueuing (the jobs must survive the commit).
             self.mapped('live_post_ids.message')
             self.env.cr.commit()
 
         for post in self:
-            # send the live posts
-            failed_posts = self.env['social_marketing.live.post']
             for live_post in post.live_post_ids:
-                try:
-                    live_post._post()
-                except Exception:
-                    failed_posts |= live_post
-            failed_posts.write({
-                'state': 'failed',
-                'failure_reason': _('Unknown error')
-            })
+                step = step_by_live[live_post.id]
+                live_post.with_delay(
+                    priority=10,
+                    max_retries=5,
+                    description=_('Publish live post %s for %s',
+                                  live_post.display_name, post.display_name),
+                    identity_key='social_publish_live_%s' % live_post.id,
+                )._dispatch_post(step_id=step.id)
+        return True
 
     def _prepare_live_post_values(self):
         self.ensure_one()
@@ -317,6 +367,7 @@ class SocialPost(models.Model):
         """ This method will check if all live.posts related to the post are completed ('posted' / 'failed').
         If it's the case, we can mark the post itself as 'posted'. """
 
+        before = {post.id: post.state for post in self}
         posts_to_complete = self.filtered(
             lambda post: all(
                 live_post.state in ('posted', 'failed')
@@ -339,6 +390,17 @@ class SocialPost(models.Model):
 
         if posts_to_complete:
             posts_to_complete.sudo().write({'state': 'posted'})
+
+        # Log a completed pipeline step on the posting→posted transition.
+        for post in self:
+            if before.get(post.id) != 'posted' and post.state == 'posted':
+                failed = post.live_post_ids.filtered(
+                    lambda lp: lp.state == 'failed')
+                post._pipeline_log(
+                    'completed',
+                    result=_('Posted (%(posted)s channel(s))%(failed)s',
+                             posted=len(post.live_post_ids) - len(failed),
+                             failed=', %s failed' % len(failed) if failed else ''))
 
     def _get_company_domain(self):
         self.ensure_one()

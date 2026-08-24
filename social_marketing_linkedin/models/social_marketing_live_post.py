@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Vertel AB AGPL-3
+# Vertel Sverige AB AGPL-3
 
 import contextlib
 import logging
@@ -11,6 +11,7 @@ import re
 from odoo import models, fields, tools, _
 from odoo.addons.mail.tools import link_preview
 from odoo.exceptions import UserError
+from odoo.addons.social_marketing.models.social_marketing_provider_response import classify_response
 
 _logger = logging.getLogger(__name__)
 
@@ -63,7 +64,11 @@ class SocialLivePostLinkedin(models.Model):
 
                     like_count = sum(like.get('count', 0) for like in stats.get('reactionSummaries', {}).values())
                     comment_count = stats.get('commentSummary', {}).get('count', 0)
-                    linkedin_post_ids[urn].update({'engagement': like_count + comment_count})
+                    linkedin_post_ids[urn].update({
+                        'engagement': like_count + comment_count,
+                        'likes': like_count,
+                        'comments': comment_count,
+                    })
 
     def _post(self):
         linkedin_live_posts = self._filter_by_media_types(['linkedin'])
@@ -153,9 +158,17 @@ class SocialLivePostLinkedin(models.Model):
                     response_json = response.json()
                 except Exception:
                     response_json = {}
+                classified = classify_response(
+                    response, unauthorized_codes={65600})
+                if classified.has_exceeded_rate_limit():
+                    failure_reason = _('Rate limit exceeded. Retry after %s seconds.') % classified.retry_after
+                elif classified.is_unauthorized():
+                    failure_reason = _('Unauthorized: access token expired or revoked.')
+                else:
+                    failure_reason = response_json.get('message', _('unknown'))
                 values = {
                     'state': 'failed',
-                    'failure_reason': response_json.get('message', _('unknown')),
+                    'failure_reason': failure_reason,
                 }
 
                 if response_json.get('serviceErrorCode') == 65600:

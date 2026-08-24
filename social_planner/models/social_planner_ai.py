@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Vertel AB AGPL-3
+# Vertel Sverige AB AGPL-3
 
 import json
 import logging
@@ -166,27 +166,33 @@ class SocialPlannerAI(models.AbstractModel):
         if not plan.exists():
             return {}
 
-        # Analysera historisk engagement per kanal (senaste 90 dagar)
+        # Analyse historical engagement per channel from stored snapshots
+        # (social_marketing.live_post.stat) instead of overwritten values.
         suggestions = {}
         channels = ['linkedin', 'facebook', 'instagram', 'twitter', 'youtube']
 
-        for channel in channels:
-            posts = self.env['social_marketing.post'].search([
-                ('plan_line_id.plan_id.policy_id', '=', plan.policy_id.id),
-                ('state', '=', 'posted'),
-                ('create_date', '>=', fields.Datetime.now() - fields.Datetime.timedelta(days=90)),
-            ])
+        live_posts = self.env['social_marketing.live.post'].search([
+            ('state', '=', 'posted'),
+            ('post_id.create_date', '>=', fields.Datetime.now() - fields.Datetime.timedelta(days=90)),
+        ])
 
-            if not posts:
+        for channel in channels:
+            channel_live_posts = live_posts.filtered(
+                lambda lp: lp.account_id.media_type == channel)
+            if not channel_live_posts:
                 suggestions[channel] = 10.0  # Default 10:00
                 continue
 
-            # Enkel heuristik — hitta timmen med högst average engagement
-            # (I verklig produktion skulle detta vara mer sofistikerat)
             engagement_by_hour = {}
-            for post in posts:
-                hour = post.scheduled_date.hour if post.scheduled_date else 10
-                engagement_by_hour[hour] = engagement_by_hour.get(hour, 0) + post.engagement
+            for live_post in channel_live_posts:
+                stat = self.env['social_marketing.live_post.stat'].search([
+                    ('live_post_id', '=', live_post.id),
+                    ('metric', '=', 'engagement'),
+                ], order='date desc', limit=1)
+                engagement = stat.value if stat else live_post.engagement
+                published = live_post.post_id.published_date or live_post.post_id.scheduled_date
+                hour = published.hour if published else 10
+                engagement_by_hour[hour] = engagement_by_hour.get(hour, 0) + engagement
 
             if engagement_by_hour:
                 best_hour = max(engagement_by_hour, key=engagement_by_hour.get)

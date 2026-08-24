@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Vertel AB AGPL-3
+# Vertel Sverige AB AGPL-3
 
 from . import communication_policy
 from . import communication_plan
@@ -14,4 +14,3 @@ from . import social_marketing_competitor
 from . import social_marketing_linkedin_inbox
 from . import social_planner_ai
 from . import res_config_settings
-from . import social_planner_dashboard

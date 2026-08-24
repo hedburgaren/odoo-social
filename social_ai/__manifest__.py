@@ -15,7 +15,7 @@
           social_marketing.post schemalagd, inte publicerad omedelbart)
         - HITL via workspace.activity.suggestion (godkännandekön)
     """,
-    'author': 'Vertel AB',
+    'author': 'Vertel Sverige AB',
     'license': 'AGPL-3',
     'depends': [
         'ai_agent_core',

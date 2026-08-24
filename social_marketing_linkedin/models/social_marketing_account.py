@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Vertel AB AGPL-3
+# Vertel Sverige AB AGPL-3
 import logging
 import base64
 import requests
@@ -72,11 +72,9 @@ class SocialAccountLinkedin(models.Model):
 
         for account in linkedin_accounts:
             all_stats_dict = account._compute_statistics_linkedin()
-            month_stats_dict = account._compute_statistics_linkedin(last_30d=True)
-            # compute trend
-            for stat_name in list(all_stats_dict.keys()):
-                all_stats_dict['%s_trend' % stat_name] = self._compute_trend(all_stats_dict.get(stat_name, 0), month_stats_dict.get(stat_name, 0))
-            # store statistics
+            # Trends are computed from stored snapshots (see
+            # social_marketing.account._compute_snapshot_trends), so we no
+            # longer double-fetch the last-30-days window here.
             account.write(all_stats_dict)
 
     def _linkedin_fetch_followers_count(self):
@@ -139,6 +137,72 @@ class SocialAccountLinkedin(models.Model):
             'engagement': data.get('clickCount', 0) + data.get('likeCount', 0) + data.get('commentCount', 0),
             'stories': data.get('shareCount', 0) + data.get('shareMentionsCount', 0),
         }
+
+    def _backfill_statistics(self, window_start, window_end):
+        linkedin_accounts = self._filter_by_media_types(['linkedin'])
+        super(SocialAccountLinkedin, (self - linkedin_accounts))._backfill_statistics(window_start, window_end)
+        for account in linkedin_accounts:
+            if not account.linkedin_account_urn:
+                continue
+            account._backfill_linkedin_share_stats(window_start, window_end)
+            account._backfill_linkedin_follower_stats(window_start, window_end)
+
+    def _backfill_linkedin_share_stats(self, window_start, window_end):
+        """Fetch daily share statistics (engagement + impressions) for a window."""
+        self.ensure_one()
+        endpoint = url_join(
+            self.env['social_marketing.media']._LINKEDIN_ENDPOINT,
+            'organizationalEntityShareStatistics')
+        start_ms = int(window_start.timestamp() * 1000)
+        end_ms = int(window_end.timestamp() * 1000)
+        endpoint += '?timeIntervals=%s' % '(timeRange:(start:%i,end:%i),timeGranularityType:DAY)' % (start_ms, end_ms)
+        params = {'q': 'organizationalEntity', 'organizationalEntity': self.linkedin_account_urn}
+        try:
+            response = self._backfill_get(endpoint, params=params, headers=self._linkedin_bearer_headers())
+            if not response.ok:
+                _logger.warning(
+                    "LinkedIn share backfill failed for %s: %s", self.display_name, response.text[:200])
+                return
+            for element in response.json().get('elements', []):
+                start = (element.get('timeRange') or {}).get('start')
+                if not start:
+                    continue
+                date = datetime.utcfromtimestamp(start / 1000).strftime('%Y-%m-%d')
+                stats = element.get('totalShareStatistics', {})
+                engagement = (stats.get('clickCount', 0) + stats.get('likeCount', 0)
+                              + stats.get('commentCount', 0) + stats.get('shareCount', 0))
+                self._create_stat_snapshot('engagement', engagement, date)
+                if stats.get('impressionCount') is not None:
+                    self._create_stat_snapshot('impressions', stats.get('impressionCount', 0), date)
+        except Exception as e:
+            _logger.warning("LinkedIn share backfill error for %s: %s", self.display_name, str(e))
+
+    def _backfill_linkedin_follower_stats(self, window_start, window_end):
+        """Best-effort fetch of daily follower statistics for a window."""
+        self.ensure_one()
+        endpoint = url_join(
+            self.env['social_marketing.media']._LINKEDIN_ENDPOINT,
+            'organizationalEntityFollowerStatistics')
+        start_ms = int(window_start.timestamp() * 1000)
+        end_ms = int(window_end.timestamp() * 1000)
+        endpoint += '?timeIntervals=%s' % '(timeRange:(start:%i,end:%i),timeGranularityType:DAY)' % (start_ms, end_ms)
+        params = {'q': 'organizationalEntity', 'organizationalEntity': self.linkedin_account_urn}
+        try:
+            response = self._backfill_get(endpoint, params=params, headers=self._linkedin_bearer_headers())
+            if not response.ok:
+                return
+            for element in response.json().get('elements', []):
+                start = (element.get('timeRange') or {}).get('start')
+                if not start:
+                    continue
+                date = datetime.utcfromtimestamp(start / 1000).strftime('%Y-%m-%d')
+                counts = element.get('followerCountsByDay') or element.get('followerCounts')
+                if counts:
+                    # take the last entry of the day
+                    follower = counts[-1].get('followerCounts', {}).get('organicFollowerCount', 0)
+                    self._create_stat_snapshot('audience', follower, date)
+        except Exception as e:
+            _logger.warning("LinkedIn follower backfill error for %s: %s", self.display_name, str(e))
 
     @api.model_create_multi
     def create(self, vals_list):

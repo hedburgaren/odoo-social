@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Vertel AB AGPL-3
+# Vertel Sverige AB AGPL-3
 import uuid
 import requests
 from werkzeug.urls import url_encode, url_join

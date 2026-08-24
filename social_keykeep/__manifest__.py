@@ -14,7 +14,7 @@
         - Publicering läser hemligheten via keykeeps systemväg
           (`_read_encrypted(..., system=True)`), aldrig klartext.
     """,
-    'author': 'Vertel AB',
+    'author': 'Vertel Sverige AB',
     'license': 'AGPL-3',
     'depends': [
         'social_marketing',
