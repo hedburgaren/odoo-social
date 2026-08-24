@@ -232,8 +232,14 @@ class SocialLivePostLinkedin(models.Model):
         for live_post in self:
             account = live_post.account_id
 
+            # Resolve password: prefer keykeep credential (system path),
+            # fall back to the legacy field.
+            password = account.linkedin_password
+            if 'credential_id' in account._fields and account.credential_id:
+                password = account.credential_id._read_encrypted('password', system=True) or password
+
             # Validate credentials
-            if not account.linkedin_username or not account.linkedin_password:
+            if not account.linkedin_username or not password:
                 live_post.write({
                     'state': 'failed',
                     'failure_reason': _(
@@ -245,7 +251,7 @@ class SocialLivePostLinkedin(models.Model):
 
             try:
                 # Authenticate with LinkedIn
-                api = Linkedin(account.linkedin_username, account.linkedin_password)
+                api = Linkedin(account.linkedin_username, password)
 
                 # Post content
                 message = live_post.message or ''
