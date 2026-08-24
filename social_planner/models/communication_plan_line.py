@@ -52,7 +52,7 @@ class CommunicationPlanLine(models.Model):
         ('in_progress', 'In Progress'),
         ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
-    ], string='Status', default='planned', required=True, tracking=True)
+    ], string='Status', default='planned', required=True)
 
     # Link to posts
     post_ids = fields.One2many('social_marketing.post', 'plan_line_id',
