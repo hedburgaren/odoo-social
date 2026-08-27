@@ -14,3 +14,4 @@ from . import social_marketing_competitor
 from . import social_marketing_linkedin_inbox
 from . import social_planner_ai
 from . import res_config_settings
+from . import ai_coworker

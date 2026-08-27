@@ -34,6 +34,25 @@
                             <button name="action_open_dashboard" type="object"
                                     string="Dashboard" class="btn btn-secondary btn-sm"/>
                         </div>
+                        <div class="oe_kanban_footer">
+                            <div class="btn-group" role="group" aria-label="Brand sections">
+                                <button name="action_view_social_accounts" type="object"
+                                        class="btn btn-sm btn-outline-secondary" title="Social Accounts"
+                                        icon="fa-users"/>
+                                <button name="action_view_policies" type="object"
+                                        class="btn btn-sm btn-outline-secondary" title="Policies"
+                                        icon="fa-legal"/>
+                                <button name="action_view_streams" type="object"
+                                        class="btn btn-sm btn-outline-secondary" title="Flows"
+                                        icon="fa-rss"/>
+                                <button name="action_view_competitors" type="object"
+                                        class="btn btn-sm btn-outline-secondary" title="Competitors"
+                                        icon="fa-line-chart"/>
+                                <button name="action_view_listening_topics" type="object"
+                                        class="btn btn-sm btn-outline-secondary" title="Listening"
+                                        icon="fa-search"/>
+                            </div>
+                        </div>
                     </div>
                 </t>
             </kanban>
@@ -86,6 +105,20 @@
                             <div class="o_stat_info">
                                 <field name="document_count" widget="statinfo"/>
                                 <span>Underlag</span>
+                            </div>
+                        </button>
+                        <button name="action_view_listening_topics" type="object"
+                                class="oe_stat_button" icon="fa-line-chart">
+                            <div class="o_stat_info">
+                                <field name="trend_report_label" widget="statinfo"/>
+                                <span>Trend Reports</span>
+                            </div>
+                        </button>
+                        <button name="action_view_credentials" type="object"
+                                class="oe_stat_button" icon="fa-key">
+                            <div class="o_stat_info">
+                                <field name="credential_count" widget="statinfo"/>
+                                <span>Credentials</span>
                             </div>
                         </button>
                     </div>

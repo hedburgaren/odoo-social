@@ -3,7 +3,7 @@
 
 {
     "name": "Social: Marketing Agency",
-    "version": "18.0.1.5.0",
+    "version": "18.0.1.6.1",
     "category": "Marketing/Social Marketing",
     "summary": "Agency layer: brands, customer underlag, portal accounts and per-brand dashboards",
     "author": "Vertel Sverige AB",
@@ -20,6 +20,7 @@
         "data/dashboard_metric_data.xml",
         "data/agency_document_type_data.xml",
         "views/social_brand_views.xml",
+        "views/social_brand_credential_views.xml",
         "views/res_partner_views.xml",
         "views/res_users_views.xml",
         "views/social_agency_document_views.xml",

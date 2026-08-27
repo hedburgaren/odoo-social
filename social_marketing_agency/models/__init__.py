@@ -3,6 +3,7 @@
 
 from . import social_brand_focus_mixin
 from . import social_brand
+from . import social_brand_credential
 from . import res_partner
 from . import res_users
 from . import social_agency_document_type

@@ -2,6 +2,9 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_social_brand_user,social.brand.user,model_social_brand,base.group_user,1,0,0,0
 access_social_brand_manager,social.brand.manager,model_social_brand,social_marketing.group_social_marketing_manager,1,1,1,1
 access_social_brand_agency_user,social.brand.agency.user,model_social_brand,social_marketing_agency.group_social_agency_brand_user,1,1,1,0
+access_social_brand_credential_user,social.brand.credential.user,model_social_brand_credential,base.group_user,1,0,0,0
+access_social_brand_credential_manager,social.brand.credential.manager,model_social_brand_credential,social_marketing.group_social_marketing_manager,1,1,1,1
+access_social_brand_credential_agency_user,social.brand.credential.agency.user,model_social_brand_credential,social_marketing_agency.group_social_agency_brand_user,1,1,1,0
 access_social_agency_document_type_user,social.agency.document.type.user,model_social_agency_document_type,base.group_user,1,0,0,0
 access_social_agency_document_type_manager,social.agency.document.type.manager,model_social_agency_document_type,social_marketing.group_social_marketing_manager,1,1,1,1
 access_social_agency_document_user,social.agency.document.user,model_social_agency_document,base.group_user,1,1,1,0

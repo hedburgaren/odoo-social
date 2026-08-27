@@ -5,7 +5,7 @@
     'name': 'Social: Communication Planner',
     'category': 'Marketing/Social Marketing',
     'summary': 'Communication planning, policy, approval workflows and AI-assisted social marketing',
-    'version': '1.2',
+    'version': '1.9',
     'description': """
 Social Planner — Kommunikationsplanering för sociala medier
 ===========================================================
@@ -32,6 +32,7 @@ Social Planner — Kommunikationsplanering för sociala medier
         'data/communication_policy_data.xml',
         'data/communication_plan_data.xml',
         'data/competitor_demo_data.xml',
+        'data/last30days_coworker.xml',
         'data/cron.xml',
         'views/communication_policy_views.xml',
         'views/communication_plan_views.xml',

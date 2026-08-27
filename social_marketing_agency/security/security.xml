@@ -37,7 +37,7 @@
     <record id="rule_social_agency_document_customer_read" model="ir.rule">
         <field name="name">Underlag: customer read own brands</field>
         <field name="model_id" ref="model_social_agency_document"/>
-        <field name="domain_force">[('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
+        <field name="domain_force">['|', ('brand_id', '=', False), ('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
         <field name="groups" eval="[(4, ref('group_social_customer_approver')), (4, ref('group_social_customer_editor'))]"/>
         <field name="perm_read" eval="1"/>
         <field name="perm_write" eval="0"/>
@@ -59,7 +59,7 @@
     <record id="rule_communication_policy_customer_read" model="ir.rule">
         <field name="name">Policy: customer read own brands</field>
         <field name="model_id" ref="social_planner.model_communication_policy"/>
-        <field name="domain_force">[('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
+        <field name="domain_force">['|', ('brand_id', '=', False), ('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
         <field name="groups" eval="[(4, ref('group_social_customer_approver')), (4, ref('group_social_customer_editor'))]"/>
         <field name="perm_read" eval="1"/>
         <field name="perm_write" eval="0"/>
@@ -71,7 +71,7 @@
     <record id="rule_communication_plan_customer_read" model="ir.rule">
         <field name="name">Plan: customer read own brands</field>
         <field name="model_id" ref="social_planner.model_communication_plan"/>
-        <field name="domain_force">[('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
+        <field name="domain_force">['|', ('brand_id', '=', False), ('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
         <field name="groups" eval="[(4, ref('group_social_customer_approver')), (4, ref('group_social_customer_editor'))]"/>
         <field name="perm_read" eval="1"/>
         <field name="perm_write" eval="0"/>
@@ -83,7 +83,7 @@
     <record id="rule_social_post_template_customer_read" model="ir.rule">
         <field name="name">Post template: customer read own brands</field>
         <field name="model_id" ref="social_marketing.model_social_marketing_post_template"/>
-        <field name="domain_force">[('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
+        <field name="domain_force">['|', ('brand_id', '=', False), ('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
         <field name="groups" eval="[(4, ref('group_social_customer_approver')), (4, ref('group_social_customer_editor'))]"/>
         <field name="perm_read" eval="1"/>
         <field name="perm_write" eval="0"/>
@@ -105,7 +105,7 @@
     <record id="rule_social_post_customer_read" model="ir.rule">
         <field name="name">Post: customer read own brands</field>
         <field name="model_id" ref="social_marketing.model_social_marketing_post"/>
-        <field name="domain_force">[('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
+        <field name="domain_force">['|', ('brand_id', '=', False), ('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
         <field name="groups" eval="[(4, ref('group_social_customer_approver')), (4, ref('group_social_customer_editor'))]"/>
         <field name="perm_read" eval="1"/>
         <field name="perm_write" eval="0"/>
@@ -140,7 +140,7 @@
     <record id="rule_social_listening_topic_customer_read" model="ir.rule">
         <field name="name">Listening topic: customer read own brands</field>
         <field name="model_id" ref="social_planner.model_social_marketing_listening_topic"/>
-        <field name="domain_force">[('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
+        <field name="domain_force">['|', ('brand_id', '=', False), ('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
         <field name="groups" eval="[(4, ref('group_social_customer_approver')), (4, ref('group_social_customer_editor'))]"/>
         <field name="perm_read" eval="1"/>
         <field name="perm_write" eval="0"/>
@@ -162,7 +162,7 @@
     <record id="rule_social_stream_customer_read" model="ir.rule">
         <field name="name">Stream: customer read own brands</field>
         <field name="model_id" ref="social_marketing.model_social_marketing_stream"/>
-        <field name="domain_force">[('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
+        <field name="domain_force">['|', ('brand_id', '=', False), ('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
         <field name="groups" eval="[(4, ref('group_social_customer_approver')), (4, ref('group_social_customer_editor'))]"/>
         <field name="perm_read" eval="1"/>
         <field name="perm_write" eval="0"/>
@@ -174,7 +174,7 @@
     <record id="rule_social_account_customer_read" model="ir.rule">
         <field name="name">Account: customer read own brands</field>
         <field name="model_id" ref="social_marketing.model_social_marketing_account"/>
-        <field name="domain_force">[('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
+        <field name="domain_force">['|', ('brand_id', '=', False), ('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
         <field name="groups" eval="[(4, ref('group_social_customer_approver')), (4, ref('group_social_customer_editor'))]"/>
         <field name="perm_read" eval="1"/>
         <field name="perm_write" eval="0"/>
@@ -186,7 +186,7 @@
     <record id="rule_social_competitor_customer_read" model="ir.rule">
         <field name="name">Competitor: customer read own brands</field>
         <field name="model_id" ref="social_planner.model_social_marketing_competitor"/>
-        <field name="domain_force">[('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
+        <field name="domain_force">['|', ('brand_id', '=', False), ('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
         <field name="groups" eval="[(4, ref('group_social_customer_approver')), (4, ref('group_social_customer_editor'))]"/>
         <field name="perm_read" eval="1"/>
         <field name="perm_write" eval="0"/>
@@ -198,7 +198,7 @@
     <record id="rule_social_media_asset_customer_read" model="ir.rule">
         <field name="name">Media asset: customer read own brands</field>
         <field name="model_id" ref="social_planner.model_social_marketing_media_asset"/>
-        <field name="domain_force">[('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
+        <field name="domain_force">['|', ('brand_id', '=', False), ('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
         <field name="groups" eval="[(4, ref('group_social_customer_approver')), (4, ref('group_social_customer_editor'))]"/>
         <field name="perm_read" eval="1"/>
         <field name="perm_write" eval="0"/>
@@ -210,7 +210,7 @@
     <record id="rule_social_message_customer_read" model="ir.rule">
         <field name="name">Message: customer read own brands</field>
         <field name="model_id" ref="social_planner.model_social_marketing_message"/>
-        <field name="domain_force">[('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
+        <field name="domain_force">['|', ('brand_id', '=', False), ('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
         <field name="groups" eval="[(4, ref('group_social_customer_approver')), (4, ref('group_social_customer_editor'))]"/>
         <field name="perm_read" eval="1"/>
         <field name="perm_write" eval="0"/>
@@ -227,6 +227,18 @@
         <field name="perm_read" eval="1"/>
         <field name="perm_write" eval="0"/>
         <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <!-- social.brand.credential: agency brand users see only their brands' credentials -->
+    <record id="rule_social_brand_credential_agency" model="ir.rule">
+        <field name="name">Brand credential: agency brand user sees own brands</field>
+        <field name="model_id" ref="model_social_brand_credential"/>
+        <field name="domain_force">[('brand_id', 'in', user.brand_ids.ids)]</field>
+        <field name="groups" eval="[(4, ref('group_social_agency_brand_user'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
         <field name="perm_unlink" eval="0"/>
     </record>
 

@@ -45,6 +45,25 @@ class SocialBrand(models.Model):
     document_ids = fields.One2many('social.agency.document', 'brand_id', string='Underlag')
     document_count = fields.Integer('Underlag', compute='_compute_document_count')
 
+    # Credentials for login-required research media (last30days engine)
+    credential_ids = fields.One2many(
+        'social.brand.credential', 'brand_id', string='Credentials')
+    credential_count = fields.Integer(
+        'Credentials', compute='_compute_credential_count')
+
+    # Listening topics + trend research (last30days reports)
+    listening_topic_ids = fields.One2many(
+        'social_marketing.listening.topic', 'brand_id',
+        string='Listening Topics')
+    listening_topic_count = fields.Integer(
+        'Listening Topics', compute='_compute_trend_research_stats')
+    trend_report_done_count = fields.Integer(
+        'Trend Reports', compute='_compute_trend_research_stats')
+    trend_report_label = fields.Char(
+        'Trend Reports (done/total)', compute='_compute_trend_research_stats',
+        help='Number of listening topics with a completed last30days report '
+             'out of the brand\'s total topics, e.g. \'1/3\'.')
+
     _sql_constraints = [
         ('name_partner_uniq', 'UNIQUE(name, partner_id)',
          'A brand with this name already exists for this customer.'),
@@ -61,6 +80,21 @@ class SocialBrand(models.Model):
     def _compute_document_count(self):
         for brand in self:
             brand.document_count = len(brand.document_ids)
+
+    @api.depends('credential_ids')
+    def _compute_credential_count(self):
+        for brand in self:
+            brand.credential_count = len(brand.credential_ids)
+
+    @api.depends('listening_topic_ids',
+                 'listening_topic_ids.trend_research_report')
+    def _compute_trend_research_stats(self):
+        for brand in self:
+            topics = brand.listening_topic_ids
+            done = topics.filtered(lambda t: t.trend_research_report)
+            brand.listening_topic_count = len(topics)
+            brand.trend_report_done_count = len(done)
+            brand.trend_report_label = '%d/%d' % (len(done), len(topics))
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -139,6 +173,85 @@ class SocialBrand(models.Model):
             'context': {'default_brand_id': self.id},
         }
 
+    def action_view_credentials(self):
+        """Open this brand's research credentials (last30days media access)."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Credentials',
+            'res_model': 'social.brand.credential',
+            'view_mode': 'list,form',
+            'domain': [('brand_id', '=', self.id)],
+            'context': {'default_brand_id': self.id},
+        }
+
+    def action_view_listening_topics(self):
+        """Open this brand's listening topics (with trend research reports)."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Listening Topics',
+            'res_model': 'social_marketing.listening.topic',
+            'view_mode': 'list,form',
+            'domain': [('brand_id', '=', self.id)],
+            'context': {'default_brand_id': self.id},
+        }
+
+    def action_view_social_accounts(self):
+        """Open this brand's social accounts."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Social Accounts',
+            'res_model': 'social_marketing.account',
+            'view_mode': 'list,form',
+            'domain': [('brand_id', '=', self.id)],
+            'context': {'default_brand_id': self.id},
+        }
+
+    def action_view_policies(self):
+        """Open this brand's communication policies."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Communication Policies',
+            'res_model': 'communication.policy',
+            'view_mode': 'list,form',
+            'domain': [('brand_id', '=', self.id)],
+            'context': {'default_brand_id': self.id},
+        }
+
+    def action_view_streams(self):
+        """Open this brand's streams (flows / feeds)."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Streams (Flows)',
+            'res_model': 'social_marketing.stream',
+            'view_mode': 'list,form',
+            'domain': [('brand_id', '=', self.id)],
+            'context': {'default_brand_id': self.id},
+        }
+
+    def action_view_competitors(self):
+        """Open this brand's competitors."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Competitors',
+            'res_model': 'social_marketing.competitor',
+            'view_mode': 'list,form',
+            'domain': [('brand_id', '=', self.id)],
+            'context': {'default_brand_id': self.id},
+        }
+
+    def action_write_last30days_env(self):
+        """Materialize all active credentials of this brand to .env files."""
+        self.ensure_one()
+        self.env['social.brand.credential'].write_brand_env_files(
+            brand_ids=self.ids)
+        return True
+
     def action_open_dashboard(self):
         self.ensure_one()
         if not self.dashboard_id:
@@ -149,6 +262,7 @@ class SocialBrand(models.Model):
             'params': {
                 'record': self.dashboard_id.id,
                 'dashboard_name': self.dashboard_id.name,
+                'brand_id': self.id,  # inject brand into the dashboard context
             },
         }
 
