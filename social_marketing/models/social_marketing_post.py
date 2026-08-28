@@ -119,13 +119,13 @@ class SocialPost(models.Model):
             else:
                 post.calendar_date = post.scheduled_date
 
-    @api.depends('live_post_ids.account_id', 'live_post_ids.display_name')
+    @api.depends('live_post_ids.social_account_id', 'live_post_ids.display_name')
     def _compute_live_posts_by_media(self):
         """ See field 'help' for more information. """
         for post in self:
             accounts_by_media = {media_id: [] for media_id in post.media_ids.ids}
-            for live_post in post.live_post_ids.filtered(lambda lp: lp.account_id.media_id.ids):
-                accounts_by_media[live_post.account_id.media_id.id].append(live_post.display_name)
+            for live_post in post.live_post_ids.filtered(lambda lp: lp.social_account_id.media_id.ids):
+                accounts_by_media[live_post.social_account_id.media_id.id].append(live_post.display_name)
             post.live_posts_by_media = json.dumps(accounts_by_media)
 
     @api.depends('state')
@@ -310,7 +310,7 @@ class SocialPost(models.Model):
 
         return [{
             'post_id': self.id,
-            'account_id': account.id,
+            'social_account_id': account.id,
         } for account in self.account_ids]
 
     def _check_post_completion(self):
