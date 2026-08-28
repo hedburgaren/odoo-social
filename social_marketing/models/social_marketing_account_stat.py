@@ -16,9 +16,9 @@ class SocialMarketingAccountStat(models.Model):
     _description = 'Social Account Stat (Snapshot)'
     _order = 'date desc, id desc'
 
-    account_id = fields.Many2one(
+    social_account_id = fields.Many2one(
         'social_marketing.account', string='Social Account',
-        required=True, ondelete='cascade', index=True)
+        required=True, ondelete='cascade', index=True, oldname='account_id')
     metric = fields.Selection([
         ('audience', 'Audience'),
         ('engagement', 'Engagement'),
@@ -28,10 +28,10 @@ class SocialMarketingAccountStat(models.Model):
     ], string='Metric', required=True)
     value = fields.Float('Value', required=True)
     date = fields.Date('Date', required=True, default=fields.Date.context_today)
-    company_id = fields.Many2one('res.company', related='account_id.company_id', store=True)
+    company_id = fields.Many2one('res.company', related='social_account_id.company_id', store=True)
 
     _sql_constraints = [
         ('account_metric_date_uniq',
-         'UNIQUE(account_id, metric, date)',
+         'UNIQUE(social_account_id, metric, date)',
          'Only one snapshot per metric per day per account is allowed.'),
     ]

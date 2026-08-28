@@ -82,7 +82,7 @@ class TestSnapshotIdempotency(TransactionCase):
         account._snapshot_statistics()
         account._snapshot_statistics()
         stats = self.env['social_marketing.account.stat'].search([
-            ('account_id', '=', account.id),
+            ('social_account_id', '=', account.id),
             ('date', '=', fields.Date.context_today(account)),
         ])
         self.assertEqual(len(stats.filtered(lambda s: s.metric == 'audience')), 1)
@@ -95,7 +95,7 @@ class TestSnapshotIdempotency(TransactionCase):
         stat_model = self.env['social_marketing.account.stat']
         # Simulate a snapshot 30 days ago and one today.
         stat_model.create({
-            'account_id': account.id,
+            'social_account_id': account.id,
             'metric': 'audience',
             'value': 80,
             'date': today - timedelta(days=30),
@@ -134,7 +134,7 @@ class TestBackfill(TransactionCase):
         account._create_stat_snapshot('audience', 100, date)
         account._create_stat_snapshot('audience', 120, date)
         stats = self.env['social_marketing.account.stat'].search([
-            ('account_id', '=', account.id),
+            ('social_account_id', '=', account.id),
             ('metric', '=', 'audience'),
             ('date', '=', date),
         ])

@@ -17,7 +17,7 @@
                         invisible="approval_state != 'awaiting_customer'"
                         confirm="Reject this post? The reason will be visible to the agency."/>
             </xpath>
-            <xpath expr="//field[@name='approval_state']" position="before">
+            <xpath expr="//field[@name='platform_ids']" position="before">
                 <field name="brand_id" groups="social_marketing.group_social_marketing_manager"/>
             </xpath>
         </field>

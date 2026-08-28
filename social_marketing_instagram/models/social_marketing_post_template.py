@@ -14,6 +14,12 @@ class SocialMarketingPostTemplate(models.Model):
 
     display_instagram_preview = fields.Boolean('Display Instagram Preview', compute='_compute_display_instagram_preview')
     instagram_preview = fields.Html('Instagram Preview', compute='_compute_instagram_preview')
+    is_instagram = fields.Boolean(compute='_compute_is_instagram')
+
+    @api.depends('platform_ids')
+    def _compute_is_instagram(self):
+        for post in self:
+            post.is_instagram = 'instagram' in post.platform_ids.mapped('code')
 
     @api.depends('message', 'account_ids.media_id.media_type')
     def _compute_display_instagram_preview(self):

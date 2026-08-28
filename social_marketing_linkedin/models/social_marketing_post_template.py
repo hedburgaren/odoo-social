@@ -11,6 +11,37 @@ class SocialPostTemplate(models.Model):
     display_linkedin_preview = fields.Boolean('Display LinkedIn Preview', compute='_compute_display_linkedin_preview')
     linkedin_preview = fields.Html('LinkedIn Preview', compute='_compute_linkedin_preview')
 
+    # LinkedIn publishing settings (audience, comments, brand partnership, media)
+    linkedin_audience = fields.Selection([
+        ('public', 'Everyone (Public)'),
+        ('connections', 'Connections only'),
+        ('group', 'A specific group'),
+    ], string='LinkedIn Audience', default='public')
+    linkedin_group_urn = fields.Char(
+        'LinkedIn Group URN',
+        help="URN of the LinkedIn group to post to when audience is a group, "
+             "e.g. 'urn:li:group:12345'.")
+    linkedin_comments = fields.Selection([
+        ('anyone', 'Anyone'),
+        ('connections', 'Connections only'),
+        ('off', 'Off (no comments)'),
+    ], string='LinkedIn Comments', default='anyone')
+    linkedin_brand_partnership = fields.Boolean(
+        'LinkedIn Brand Partnership',
+        help="Mark the post as a brand partnership (paid partnership label).")
+    linkedin_media_type = fields.Selection([
+        ('image', 'Image'),
+        ('video', 'Video'),
+    ], string='LinkedIn Media Format', default='image')
+    linkedin_image_width = fields.Integer('LinkedIn Image Width (px)', default=1200)
+    linkedin_image_height = fields.Integer('LinkedIn Image Height (px)', default=627)
+    is_linkedin = fields.Boolean(compute='_compute_is_linkedin')
+
+    @api.depends('platform_ids')
+    def _compute_is_linkedin(self):
+        for post in self:
+            post.is_linkedin = 'linkedin' in post.platform_ids.mapped('code')
+
     @api.depends('message', 'account_ids.media_id.media_type')
     def _compute_display_linkedin_preview(self):
         for post in self:

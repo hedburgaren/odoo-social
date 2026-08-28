@@ -11,7 +11,7 @@
             <field name="model_id" ref="social_marketing.model_social_marketing_post"/>
             <field name="field_id" ref="social_marketing.field_social_marketing_post__id"/>
             <field name="aggregation">count</field>
-            <field name="default_domain">[('approval_state', '=', 'awaiting_customer')]</field>
+            <field name="default_domain">[["approval_state", "=", "awaiting_customer"]]</field>
             <field name="unit">integer</field>
         </record>
 

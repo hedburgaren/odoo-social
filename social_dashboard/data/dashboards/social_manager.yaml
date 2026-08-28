@@ -16,6 +16,13 @@ filters:
       from: this_month_start
       to: today
 
+  - key: brand
+    type: many2one
+    label: Brand
+    model: social.brand
+    field: brand_id
+    optional: true
+
 metrics:
   - key: social.reach
     label: "Reach"
@@ -79,7 +86,7 @@ charts:
     label: "Engagement by Channel"
     layout: {x: 0, y: 2, w: 6, h: 4}
     config:
-      filter_field: account_id.media_type
+      filter_field: social_account_id.media_type
 
   - key: chart_roi
     type: table

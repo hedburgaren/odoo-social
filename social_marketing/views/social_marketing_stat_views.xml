@@ -37,7 +37,7 @@
         <field name="model">social_marketing.account.stat</field>
         <field name="arch" type="xml">
             <list string="Account Statistics">
-                <field name="account_id"/>
+                <field name="social_account_id"/>
                 <field name="metric"/>
                 <field name="value"/>
                 <field name="date"/>

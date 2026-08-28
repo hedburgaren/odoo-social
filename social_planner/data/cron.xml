@@ -10,5 +10,25 @@
             <field name="interval_type">minutes</field>
             <field name="active" eval="True"/>
         </record>
+
+        <record id="ir_cron_linkedin_company_streams" model="ir.cron">
+            <field name="name">Social: LinkedIn Company Streams</field>
+            <field name="model_id" ref="model_social_marketing_stream"/>
+            <field name="state">code</field>
+            <field name="code">model.refresh_linkedin_company_streams()</field>
+            <field name="interval_number">6</field>
+            <field name="interval_type">hours</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <record id="ir_cron_linkedin_inbox" model="ir.cron">
+            <field name="name">Social: LinkedIn Inbox</field>
+            <field name="model_id" ref="model_social_marketing_account"/>
+            <field name="state">code</field>
+            <field name="code">model.refresh_linkedin_inbox()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">hours</field>
+            <field name="active" eval="True"/>
+        </record>
     </data>
 </odoo>

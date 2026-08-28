@@ -207,3 +207,30 @@ rule for its customer groups on the step model
 (`post_id.brand_id.partner_id = user.partner_id.commercial_partner_id`) so
 customers see the pipeline log of their own brands. Base access grants read
 to `base.group_user` and full rights to social marketing managers.
+
+## LinkedIn-streams (företagssidor + feed) — 2026-08-28
+
+**Mål**: hämta inlägg från LinkedIn-företagssidor (konkurrenter + kunder) in i
+`social_marketing.stream.post` (Feed-vyn) via Playwright-skrapning.
+
+### Hur det fungerar
+- Stream-typer: `linkedin_company_page` (skrapar `linkedin.com/company/<id>/posts/`)
+  och `linkedin_feed` (användarens flöde).
+- `_fetch_linkedin_playwright()` (social_marketing_linkedin/models/social_marketing_stream.py):
+  kör en Chromium-subprocess **headed under Xvfb** med kontoets
+  `linkedin_playwright_session` (storage_state med li_at m.fl.).
+- **RLIMIT_AS-fix**: Odoo sätter 4 GB address-space-limit → Chromium kraschar (SIGTRAP).
+  Subprocessen körs via `bash -c "ulimit -v unlimited && exec xvfb-run -a python3 ..."`.
+- Dedupe på `linkedin_post_urn`. Cron "Social: LinkedIn Company Streams" var 6:e timme.
+- Konkurrentkortet (action-512) har smartknappar "Posts" + "Streams".
+
+### Data på social
+- Maja Berg (res.user id 10, login maja.berg@vertel.se) = LinkedIn-testkonto.
+- LinkedIn-konto id 62 (auth_method playwright, session lagrad).
+- Konkurrenter: UCS OneDo (5), Linserv AB (6) + 14 UCS-kunder (7–20, tagg "UCS OneDo kund").
+- 16 streams (id 1–16) med competitor_id + linkedin_company_public_id.
+
+### Kända risker
+- LinkedIn bot-detection: headless → tom sida; hög frekvens → 429 (cooldown ~30-60 min).
+- DOM-selectors kan ändras → isolerade i `_LINKEDIN_PLAYWRIGHT_SCRIPT`.
+- Sessionen dör när li_at löper ut → kör "Browser Login — Playwright" på kontot igen.

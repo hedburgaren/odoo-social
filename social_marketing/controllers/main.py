@@ -42,7 +42,7 @@ class SocialController(http.Controller):
         to the correct media_type """
         stream_post = request.env['social_marketing.stream.post'].search([
             ('id', '=', stream_post_id),
-            ('stream_id.account_id.media_id.media_type', '=', media_type),
+            ('stream_id.social_account_id.media_id.media_type', '=', media_type),
         ])
         if not stream_post:
             raise Forbidden()

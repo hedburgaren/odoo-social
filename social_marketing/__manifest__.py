@@ -13,6 +13,7 @@
         'security/social_marketing_security.xml',
         'security/ir.model.access.csv',
         'data/ir_cron_data.xml',
+        'data/social_marketing_platform_data.xml',
         'views/social_marketing_menu_views.xml',
         'views/social_marketing_account_views.xml',
         'views/social_marketing_post_template_views.xml',

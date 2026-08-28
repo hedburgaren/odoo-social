@@ -9,7 +9,7 @@
     "author": "Vertel Sverige AB",
     "website": "https://vertel.se",
     "license": "AGPL-3",
-    "depends": ["social_dashboard", "social_planner"],
+    "depends": ["social_planner", "dashboard_vrtl"],
     "data": [
         "security/ir.model.access.csv",
         "data/dashboard_source_data.xml",
@@ -18,5 +18,5 @@
     "post_init_hook": "_post_init_load_dashboards",
     "installable": True,
     "application": False,
-    "auto_install": False,
+    "auto_install": True,
 }

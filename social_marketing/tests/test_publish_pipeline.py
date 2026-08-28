@@ -80,7 +80,7 @@ class TestPublishPipelineDispatch(TransactionCase):
             accounts=[self.account_1, self.account_2])
 
         def flaky_post(live_post):
-            if live_post.account_id == self.account_2:
+            if live_post.social_account_id == self.account_2:
                 raise Exception('API rate limited')
             return live_post.write({'state': 'posted'})
 
@@ -109,7 +109,7 @@ class TestPublishPipelineDispatch(TransactionCase):
     def test_rate_limit_delay_global_default(self):
         live_post = self.env['social_marketing.live.post'].create({
             'post_id': self._create_post().id,
-            'account_id': self.account_1.id,
+            'social_account_id': self.account_1.id,
         })
         self.env['ir.config_parameter'].set_param(
             'social_publish_rate_limit_delay_seconds', '0.0')
@@ -121,7 +121,7 @@ class TestPublishPipelineDispatch(TransactionCase):
     def test_rate_limit_delay_per_media_override(self):
         live_post = self.env['social_marketing.live.post'].create({
             'post_id': self._create_post().id,
-            'account_id': self.account_1.id,
+            'social_account_id': self.account_1.id,
         })
         self.env['ir.config_parameter'].set_param(
             'social_publish_rate_limit_delay_seconds', '2.5')

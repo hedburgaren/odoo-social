@@ -33,7 +33,7 @@ class SocialLivePostFacebook(models.Model):
 
     def _post_facebook(self):
         for live_post in self:
-            account = live_post.account_id
+            account = live_post.social_account_id
             if not account.facebook_page_id or not self._get_facebook_token(account):
                 live_post.write({
                     'state': 'failed',
@@ -92,7 +92,7 @@ class SocialLivePostFacebook(models.Model):
     def _facebook_post_photos(self, live_post):
         """ Post images to Facebook. Facebook supports multi-image posts
         via the /photos endpoint with published=false, then /feed with attached_media. """
-        account = live_post.account_id
+        account = live_post.social_account_id
         images = live_post.post_id.image_ids
 
         if len(images) == 1:
@@ -145,13 +145,13 @@ class SocialLivePostFacebook(models.Model):
     def _refresh_statistics(self):
         super(SocialLivePostFacebook, self)._refresh_statistics()
         facebook_posts = self.env['social_marketing.live.post'].sudo().search([
-            ('account_id.media_type', '=', 'facebook'),
+            ('social_account_id.media_type', '=', 'facebook'),
             ('facebook_post_id', '!=', False),
             ('state', '=', 'posted'),
         ], order='create_date DESC', limit=500)
 
         for post in facebook_posts:
-            account = post.account_id
+            account = post.social_account_id
             try:
                 endpoint = url_join(FACEBOOK_ENDPOINT, post.facebook_post_id)
                 params = {

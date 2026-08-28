@@ -4,6 +4,7 @@
 """Data-source adapters exposing social_marketing data to dashboard_vrtl."""
 
 from odoo import _, api, models
+from odoo.exceptions import AccessError
 
 from .social_brand_scope import brand_domain
 
@@ -48,14 +49,14 @@ class DashboardSourceSocialEngagement(models.AbstractModel):
             domain.append(("post_id.published_date", ">=", filters["date_from"]))
         if filters.get("date_to"):
             domain.append(("post_id.published_date", "<=", filters["date_to"]))
-        domain += brand_domain(self.env["social_marketing.live.post"], "account_id.brand_id")
-        # Cross-chart / global filters (e.g. [['account_id.media_type', '=', 'linkedin']])
+        domain += brand_domain(self.env["social_marketing.live.post"], "social_account_id.brand_id")
+        # Cross-chart / global filters (e.g. [['social_account_id.media_type', '=', 'linkedin']])
         if filters.get("domain"):
             domain.extend(filters["domain"])
 
         group_records = self.env["social_marketing.live.post"]._read_group(
             domain=domain,
-            groupby=["account_id"],
+            groupby=["social_account_id"],
             aggregates=["engagement:sum", "__count"],
             limit=1000,
         )
@@ -154,15 +155,22 @@ class DashboardSourceSocialRoi(models.AbstractModel):
         return dict(self.env.cr.fetchall())
 
     def _leads_by_source(self, source_ids):
-        groups = self.env["crm.lead"]._read_group(
-            [("source_id", "in", source_ids)],
-            groupby=["source_id"], aggregates=["__count"])
-        return {source.id: count for source, count in groups if source}
+        try:
+            groups = self.env["crm.lead"]._read_group(
+                [("source_id", "in", source_ids)],
+                groupby=["source_id"], aggregates=["__count"])
+            return {source.id: count for source, count in groups if source}
+        except AccessError:
+            # User has no CRM access: hide the leads column gracefully
+            return {}
 
     def _orders_by_source(self, source_ids):
         if "source_id" not in self.env["sale.order"]._fields:
             return {}
-        groups = self.env["sale.order"]._read_group(
-            [("source_id", "in", source_ids)],
-            groupby=["source_id"], aggregates=["__count"])
-        return {source.id: count for source, count in groups if source}
+        try:
+            groups = self.env["sale.order"]._read_group(
+                [("source_id", "in", source_ids)],
+                groupby=["source_id"], aggregates=["__count"])
+            return {source.id: count for source, count in groups if source}
+        except AccessError:
+            return {}

@@ -62,8 +62,29 @@ class SocialPostTemplate(models.Model):
     # JSON array capturing the URLs of the images to make it easy to display them in the kanban view
     image_urls = fields.Text(
         'Images URLs', compute='_compute_image_urls')
+    preview_images_html = fields.Html(
+        'Preview Images', compute='_compute_preview_images_html',
+        help="Rendered <img> tags for the attached images, used in the form preview.")
+
+    @api.depends('image_ids')
+    def _compute_preview_images_html(self):
+        for post in self:
+            imgs = ''.join(
+                '<img src="/web/image/ir.attachment/%s" '
+                'style="max-height:120px;max-width:120px;margin:4px;" '
+                'class="o_social_marketing_preview_img"/>' % att.id
+                for att in post.image_ids
+            )
+            post.preview_images_html = imgs
     is_split_per_media = fields.Boolean('Split Per Network')
     media_count = fields.Integer('Media Count', compute='_compute_media_count')
+
+    # ── Platform targeting ──
+    # Targets one or more platforms (many2many_tags). Platform-specific settings
+    # are added by the bridge modules (social_marketing_linkedin, ...).
+    platform_ids = fields.Many2many(
+        'social_marketing.platform', string='Platforms',
+        help="The platforms this template targets.")
     # Account management
     account_ids = fields.Many2many('social_marketing.account', string='Social Accounts',
                                    help="The accounts on which this post will be published.",

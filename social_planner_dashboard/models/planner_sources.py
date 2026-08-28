@@ -7,7 +7,12 @@ from datetime import timedelta
 
 from odoo import _, api, fields, models
 
-from odoo.addons.social_dashboard.models.social_brand_scope import brand_domain
+try:
+    from odoo.addons.social_dashboard.models.social_brand_scope import brand_domain
+except ImportError:
+    # social_dashboard is not installed (it is optional): no brand scoping
+    def brand_domain(model, brand_path="brand_id"):
+        return []
 
 
 class DashboardSourceSocialCompetitor(models.AbstractModel):

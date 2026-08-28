@@ -22,7 +22,7 @@ class SocialLivePost(models.Model):
     _description = 'Social Live Post'
 
     post_id = fields.Many2one('social_marketing.post', string="Social Post", required=True, readonly=True, ondelete="cascade")
-    account_id = fields.Many2one('social_marketing.account', string="Social Account", required=True, readonly=True, ondelete="cascade")
+    social_account_id = fields.Many2one('social_marketing.account', string="Social Account", required=True, readonly=True, ondelete="cascade", oldname='account_id')
     message = fields.Char('Message', compute='_compute_message',
         help="Content of the social_marketing.post message that is post-processed (links are shortened, UTMs, ...)")
     live_post_link = fields.Char('Post Link', compute='_compute_live_post_link',
@@ -41,10 +41,10 @@ class SocialLivePost(models.Model):
     likes = fields.Integer("Likes", readonly=True, help="Number of likes/reactions on the post.")
     comments = fields.Integer("Comments", readonly=True, help="Number of comments on the post.")
     shares = fields.Integer("Shares", readonly=True, help="Number of shares/reposts of the post.")
-    company_id = fields.Many2one('res.company', 'Company', related='account_id.company_id')
+    company_id = fields.Many2one('res.company', 'Company', related='social_account_id.company_id')
 
     @api.depends(lambda self:
-        ['post_id.message', 'post_id.message_plain', 'post_id.utm_campaign_id', 'account_id.media_type', 'account_id.utm_medium_id', 'post_id.source_id'] +
+        ['post_id.message', 'post_id.message_plain', 'post_id.utm_campaign_id', 'social_account_id.media_type', 'social_account_id.utm_medium_id', 'post_id.source_id'] +
         ['post_id.%s' % field for field in self.env['social_marketing.post']._get_post_message_modifying_fields()])
     def _compute_message(self):
         """ Prepares the message of the parent post, and shortens links to contain UTM data. """
@@ -55,20 +55,20 @@ class SocialLivePost(models.Model):
 
             live_post.message = self.env['social_marketing.post']._prepare_post_content(
                 message,
-                live_post.account_id.media_type,
+                live_post.social_account_id.media_type,
                 **{field: live_post.post_id[field] for field in self.env['social_marketing.post']._get_post_message_modifying_fields()})
 
-    @api.depends('account_id.media_id')
+    @api.depends('social_account_id.media_id')
     def _compute_live_post_link(self):
         for live_post in self:
             live_post.live_post_link = False
 
-    @api.depends('state', 'account_id')
+    @api.depends('state', 'social_account_id')
     def _compute_display_name(self):
         """ ex: [Facebook] Odoo Social: posted, [Twitter] Mitchell Admin: failed, ... """
         state_description_values = dict(self._fields['state']._description_selection(self.env))
         for live_post in self:
-            live_post.display_name = f'{live_post.account_id.display_name}: {state_description_values.get(live_post.state)}'
+            live_post.display_name = f'{live_post.social_account_id.display_name}: {state_description_values.get(live_post.state)}'
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -178,12 +178,12 @@ class SocialLivePost(models.Model):
         post_id = self.post_id
         return {
             'campaign_id': post_id.utm_campaign_id.id,
-            'medium_id': self.account_id.utm_medium_id.id,
+            'medium_id': self.social_account_id.utm_medium_id.id,
             'source_id': post_id.source_id.id,
         }
 
     def _filter_by_media_types(self, media_types):
-        return self.filtered(lambda post: post.account_id.media_id.media_type in media_types)
+        return self.filtered(lambda post: post.social_account_id.media_id.media_type in media_types)
 
     # ------------------------------------------------------------------
     # Job-queue dispatch (publishing pipeline)
@@ -196,7 +196,7 @@ class SocialLivePost(models.Model):
         exists, otherwise the global default
         social_publish_rate_limit_delay_seconds (default 1.0). """
         self.ensure_one()
-        media = self.account_id.media_id
+        media = self.social_account_id.media_id
         if media:
             limit = self.env['social.publish.rate.limit'].search(
                 [('media_id', '=', media.id)], limit=1)
