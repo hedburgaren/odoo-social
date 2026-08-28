@@ -11,7 +11,7 @@ class SocialMediaLinkedin(models.Model):
     _inherit = 'social_marketing.media'
 
     _LINKEDIN_ENDPOINT = 'https://api.linkedin.com/rest/'
-    _LINKEDIN_SCOPE = 'openid profile email w_member_social r_organization_social w_organization_social rw_organization_admin r_organization_followers'
+    _LINKEDIN_SCOPE = 'openid profile email w_member_social'
 
     # TODO in master: remove all projections
     # Control the fields returned by the LinkedIn API
