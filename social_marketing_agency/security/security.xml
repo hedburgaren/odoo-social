@@ -242,6 +242,95 @@
         <field name="perm_unlink" eval="0"/>
     </record>
 
+
+    <!-- Brand kit: the four kit models are brand scoped exactly like the
+         credentials above. Agency brand users reach only their assigned
+         brands, customer users only the brands of their own customer. -->
+
+    <record id="rule_social_brand_color_agency" model="ir.rule">
+        <field name="name">Brand color: agency brand user sees own brands</field>
+        <field name="model_id" ref="model_social_brand_color"/>
+        <field name="domain_force">[('brand_id', 'in', user.brand_ids.ids)]</field>
+        <field name="groups" eval="[(4, ref('group_social_agency_brand_user'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+    <record id="rule_social_brand_color_customer_read" model="ir.rule">
+        <field name="name">Brand color: customer read own brands</field>
+        <field name="model_id" ref="model_social_brand_color"/>
+        <field name="domain_force">[('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('group_social_customer_approver')), (4, ref('group_social_customer_editor'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <record id="rule_social_brand_font_agency" model="ir.rule">
+        <field name="name">Brand font: agency brand user sees own brands</field>
+        <field name="model_id" ref="model_social_brand_font"/>
+        <field name="domain_force">[('brand_id', 'in', user.brand_ids.ids)]</field>
+        <field name="groups" eval="[(4, ref('group_social_agency_brand_user'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+    <record id="rule_social_brand_font_customer_read" model="ir.rule">
+        <field name="name">Brand font: customer read own brands</field>
+        <field name="model_id" ref="model_social_brand_font"/>
+        <field name="domain_force">[('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('group_social_customer_approver')), (4, ref('group_social_customer_editor'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <record id="rule_social_brand_logo_agency" model="ir.rule">
+        <field name="name">Brand logo: agency brand user sees own brands</field>
+        <field name="model_id" ref="model_social_brand_logo"/>
+        <field name="domain_force">[('brand_id', 'in', user.brand_ids.ids)]</field>
+        <field name="groups" eval="[(4, ref('group_social_agency_brand_user'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+    <record id="rule_social_brand_logo_customer_read" model="ir.rule">
+        <field name="name">Brand logo: customer read own brands</field>
+        <field name="model_id" ref="model_social_brand_logo"/>
+        <field name="domain_force">[('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('group_social_customer_approver')), (4, ref('group_social_customer_editor'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <record id="rule_social_brand_asset_agency" model="ir.rule">
+        <field name="name">Brand asset: agency brand user sees own brands</field>
+        <field name="model_id" ref="model_social_brand_asset"/>
+        <field name="domain_force">[('brand_id', 'in', user.brand_ids.ids)]</field>
+        <field name="groups" eval="[(4, ref('group_social_agency_brand_user'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+    <record id="rule_social_brand_asset_customer_read" model="ir.rule">
+        <field name="name">Brand asset: customer read own brands</field>
+        <field name="model_id" ref="model_social_brand_asset"/>
+        <field name="domain_force">[('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('group_social_customer_approver')), (4, ref('group_social_customer_editor'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
     <!-- social.agency.document.type (shared reference data) -->
     <record id="rule_social_agency_document_type_customer_read" model="ir.rule">
         <field name="name">Underlag type: customer read</field>
