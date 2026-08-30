@@ -34,6 +34,15 @@ class SocialBrand(models.Model):
         help="If enabled, customer users of this brand get full editing rights "
              "on their own data; otherwise they can only read and approve.")
 
+    publishing_paused = fields.Boolean(
+        'Publishing Paused',
+        help="Killswitch. While set, nothing is published for this brand: "
+             "queued and scheduled posts are stopped at dispatch, not just "
+             "hidden in the interface. Other brands are unaffected.")
+    publishing_paused_reason = fields.Char(
+        'Pause Reason',
+        help="Shown on the blocked posts so it is clear why they did not go out.")
+
     default_policy_id = fields.Many2one(
         'communication.policy', string='Default Policy',
         help="Default communication policy used for posts of this brand.")

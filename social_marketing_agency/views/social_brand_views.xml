@@ -135,7 +135,18 @@
                             <field name="default_policy_id"/>
                             <field name="dashboard_id" readonly="1"/>
                         </group>
+                        <group string="Publishing" name="brand_publishing">
+                            <field name="publishing_paused"/>
+                            <field name="publishing_paused_reason"
+                                   invisible="not publishing_paused"/>
+                        </group>
                     </group>
+                    <div class="alert alert-warning" role="alert"
+                         invisible="not publishing_paused">
+                        Publishing is paused for this brand. Nothing goes out
+                        to any social network until this is switched off.
+                        Other brands are unaffected.
+                    </div>
                     <notebook>
                         <page string="Underlag" name="underlag">
                             <field name="document_ids" readonly="0">

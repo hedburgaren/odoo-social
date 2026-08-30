@@ -5,10 +5,10 @@
     'name': 'Social: Marketing',
     'category': 'Marketing/Social Marketing',
     'summary': 'Manage your social marketing',
-    'version': '1.1',
+    'version': '1.3.0',
     'description': """Manage your social marketing """,
     'website': 'https://vertel.se/app/odoo-social',
-    'depends': ['web', 'mail','link_tracker'],
+    'depends': ['web', 'mail', 'link_tracker', 'queue_job'],
     'data': [
         'security/social_marketing_security.xml',
         'security/ir.model.access.csv',
@@ -23,11 +23,13 @@
         'views/social_marketing_post_views.xml',
         'views/res_config_settings_views.xml',
         'views/social_marketing_media_views.xml',
+        'views/social_publish_rate_limit_views.xml',
         'views/discuss_channel_view.xml',
         # 'views/utm_campaign_views.xml',
         'views/social_marketing_stream_post_views.xml',
         'views/social_marketing_stream_views.xml',
         'views/social_marketing_live_post_views.xml',
+        'views/social_marketing_stat_views.xml',
 
         'views/social_marketing_templates.xml'
     ],
