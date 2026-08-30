@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Vertel Sverige AB AGPL-3
 
-from odoo.exceptions import ValidationError
+from odoo.exceptions import AccessError, ValidationError
 from odoo.tests.common import TransactionCase, tagged
 
 from ..models.social_data_binding_core import (
@@ -182,3 +182,53 @@ class TestDataBindings(TransactionCase):
             web_image_source('res.partner', 7, 'image_1920'),
             '/web/image/res.partner/7/image_1920')
         self.assertEqual(web_image_source('res.partner', False, 'x'), '')
+
+
+class TestDataBindingAccess(TransactionCase):
+    """Creating a binding is a manager action.
+
+    A binding names a model and a field, and the renderer will read that
+    field. Whoever can create one therefore chooses what the render pulls out
+    of the database. Resolution runs unsudoed, so record rules still apply and
+    a user cannot read past their own rights, but choosing the target is a
+    configuration act rather than an editing one, and it belongs with the
+    people who configure templates.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.template = self.env['social.image.template'].create({
+            'name': 'Access template'})
+        self.partner_model = self.env['ir.model']._get('res.partner')
+        self.name_field = self.env['ir.model.fields']._get(
+            'res.partner', 'name')
+
+    def _vals(self):
+        return {
+            'name': 'partner_name',
+            'model_id': self.partner_model.id,
+            'field_id': self.name_field.id,
+            'template_id': self.template.id,
+        }
+
+    def test_marketing_user_cannot_create_a_binding(self):
+        user = self.env['res.users'].create({
+            'name': 'Binding User',
+            'login': 'binding_user_test',
+            'groups_id': [(4, self.env.ref(
+                'social_marketing.group_social_marketing_user').id)],
+        })
+        with self.assertRaises(AccessError):
+            self.env['social.data.binding'].with_user(user).create(
+                self._vals())
+
+    def test_marketing_manager_can_create_a_binding(self):
+        user = self.env['res.users'].create({
+            'name': 'Binding Manager',
+            'login': 'binding_manager_test',
+            'groups_id': [(4, self.env.ref(
+                'social_marketing.group_social_marketing_manager').id)],
+        })
+        binding = self.env['social.data.binding'].with_user(user).create(
+            self._vals())
+        self.assertTrue(binding.id)
