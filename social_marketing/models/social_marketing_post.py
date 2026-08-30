@@ -265,8 +265,31 @@ class SocialPost(models.Model):
                 "\n".join(["%s : %s" % (post.display_name, ",".join(err)) for post, err in errors.items()])
             ))
 
+    def _get_target_platforms(self):
+        """ Platforms this post is targeted at (see platform_ids). """
+        self.ensure_one()
+        return self.platform_ids
+
+    def _validate_platform_rules(self):
+        """ Pre-flight: check the post against each target platform's rules.
+
+        The limits themselves are data on ``social_marketing.platform`` so a
+        platform changing its rules does not require a code change. Raised at
+        scheduling time so the user finds out while they can still fix it,
+        rather than at publish time when the post is already queued.
+        """
+        violations = []
+        for post in self:
+            for platform in post._get_target_platforms():
+                violations.extend(platform._validate_post(post))
+        if violations:
+            raise ValidationError(_(
+                "This post does not satisfy the rules of every target "
+                "platform:\n%s", "\n".join("- %s" % v for v in violations)))
+
     def action_schedule(self):
         self._check_post_access()
+        self._validate_platform_rules()
         self.write({'state': 'scheduled'})
 
     def action_set_draft(self):
@@ -275,6 +298,7 @@ class SocialPost(models.Model):
 
     def action_post(self):
         self._check_post_access()
+        self._validate_platform_rules()
 
         self.write({
             'post_method': 'now',
@@ -314,7 +338,11 @@ class SocialPost(models.Model):
         claim jobs with FOR UPDATE SKIP LOCKED (safe in HA), retry/backoff on
         transient errors, per-media rate limiting. The post is only completed
         once all live posts are terminal (published or failed). """
+        # Only the live posts that do not exist yet are dispatched, so a
+        # second call for the same post is a no-op instead of a re-publish.
+        new_live_posts = self.env['social_marketing.live.post']
         for post in self:
+            known_ids = set(post.live_post_ids.ids)
             post.write({
                 'state': 'posting',
                 'published_date': fields.Datetime.now(),
@@ -322,19 +350,30 @@ class SocialPost(models.Model):
                     (0, 0, live_post)
                     for live_post in post._prepare_live_post_values()],
             })
+            new_live_posts |= post.live_post_ids.filtered(
+                lambda lp: lp.id not in known_ids)
 
-        # One pending pipeline step per live post, created before commit so
-        # the steps persist together with the live posts.
+        # A brand with publishing paused is stopped here as well as inside
+        # _dispatch_post, so no job is even created for it.
+        blocked = self.env['social_marketing.live.post']
+        for live_post in new_live_posts:
+            allowed, reason = live_post._check_publish_allowed()
+            if not allowed:
+                blocked |= live_post
+                live_post._block_publishing(reason)
+        new_live_posts -= blocked
+
+        # One pending pipeline step per newly created live post, created
+        # before commit so the steps persist together with the live posts.
         step_by_live = {}
-        for post in self:
-            for live_post in post.live_post_ids:
-                step = self.env['social.publish.pipeline.step'].sudo().create({
-                    'post_id': post.id,
-                    'live_post_id': live_post.id,
-                    'stage': 'dispatched',
-                    'state': 'pending',
-                })
-                step_by_live[live_post.id] = step
+        for live_post in new_live_posts:
+            step = self.env['social.publish.pipeline.step'].sudo().create({
+                'post_id': live_post.post_id.id,
+                'live_post_id': live_post.id,
+                'stage': 'dispatched',
+                'state': 'pending',
+            })
+            step_by_live[live_post.id] = step
 
         if not getattr(threading.current_thread(), 'testing', False):
             # If there's a link in the message, the Facebook / Twitter API will fetch it
@@ -343,25 +382,35 @@ class SocialPost(models.Model):
             self.mapped('live_post_ids.message')
             self.env.cr.commit()
 
-        for post in self:
-            for live_post in post.live_post_ids:
-                step = step_by_live[live_post.id]
-                live_post.with_delay(
-                    priority=10,
-                    max_retries=5,
-                    description=_('Publish live post %s for %s',
-                                  live_post.display_name, post.display_name),
-                    identity_key='social_publish_live_%s' % live_post.id,
-                )._dispatch_post(step_id=step.id)
+        for live_post in new_live_posts:
+            step = step_by_live[live_post.id]
+            live_post.with_delay(
+                priority=10,
+                max_retries=5,
+                description=_('Publish live post %s for %s',
+                              live_post.display_name,
+                              live_post.post_id.display_name),
+                identity_key='social_publish_live_%s' % live_post.id,
+            )._dispatch_post(step_id=step.id)
         return True
 
     def _prepare_live_post_values(self):
+        """ Values for the live posts still missing for this post.
+
+        Accounts that already have a live post are skipped: re-posting an
+        already dispatched post must not create a second published item.
+        The database unique index on ``idempotency_key`` is the real
+        guarantee; this only avoids provoking it on the normal path.
+        """
         self.ensure_one()
 
+        existing_account_ids = set(
+            self.live_post_ids.mapped('social_account_id').ids)
         return [{
             'post_id': self.id,
             'social_account_id': account.id,
-        } for account in self.account_ids]
+        } for account in self.account_ids
+            if account.id not in existing_account_ids]
 
     def _check_post_completion(self):
         """ This method will check if all live.posts related to the post are completed ('posted' / 'failed').
@@ -370,7 +419,7 @@ class SocialPost(models.Model):
         before = {post.id: post.state for post in self}
         posts_to_complete = self.filtered(
             lambda post: all(
-                live_post.state in ('posted', 'failed')
+                live_post.state in ('posted', 'failed', 'retracted')
                 for live_post in post.live_post_ids
             )
         )

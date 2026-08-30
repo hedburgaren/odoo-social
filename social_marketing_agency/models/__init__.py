@@ -15,6 +15,7 @@ from . import social_marketing_post
 from . import social_marketing_listening_topic
 from . import social_marketing_stream
 from . import social_marketing_account
+from . import social_marketing_live_post
 from . import social_marketing_competitor
 from . import social_marketing_media_asset
 from . import social_marketing_message
