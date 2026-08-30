@@ -342,4 +342,48 @@
         <field name="perm_create" eval="0"/>
         <field name="perm_unlink" eval="0"/>
     </record>
+
+    <!-- ── social.content.source: brand isolation ──────────────────────── -->
+    <record id="rule_social_content_source_agency_user" model="ir.rule">
+        <field name="name">Content source: agency user own brands</field>
+        <field name="model_id" ref="model_social_content_source"/>
+        <field name="domain_force">[('brand_id', 'in', user.brand_ids.ids)]</field>
+        <field name="groups" eval="[(4, ref('group_social_agency_brand_user'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+    <record id="rule_social_content_source_customer_read" model="ir.rule">
+        <field name="name">Content source: customer read own brands</field>
+        <field name="model_id" ref="model_social_content_source"/>
+        <field name="domain_force">[('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('group_social_customer_approver')), (4, ref('group_social_customer_editor'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <!-- ── social.content.source.log: brand isolation ──────────────────── -->
+    <record id="rule_social_content_source_log_agency_user" model="ir.rule">
+        <field name="name">Content source log: agency user own brands</field>
+        <field name="model_id" ref="model_social_content_source_log"/>
+        <field name="domain_force">[('brand_id', 'in', user.brand_ids.ids)]</field>
+        <field name="groups" eval="[(4, ref('group_social_agency_brand_user'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+    <record id="rule_social_content_source_log_customer_read" model="ir.rule">
+        <field name="name">Content source log: customer read own brands</field>
+        <field name="model_id" ref="model_social_content_source_log"/>
+        <field name="domain_force">[('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('group_social_customer_approver')), (4, ref('group_social_customer_editor'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
 </odoo>

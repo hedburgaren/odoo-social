@@ -16,6 +16,7 @@ from . import communication_policy
 from . import communication_plan
 from . import social_marketing_post_template
 from . import social_marketing_post
+from . import social_content_source
 from . import social_marketing_listening_topic
 from . import social_marketing_stream
 from . import social_marketing_account

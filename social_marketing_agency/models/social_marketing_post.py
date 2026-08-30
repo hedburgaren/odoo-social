@@ -20,6 +20,18 @@ class SocialMarketingPost(models.Model):
         'social.brand', string='Brand',
         default=lambda self: self._get_default_brand())
 
+    # ── Reuse pool (level one) ───────────────────────────────────────────
+    # Evergreen posts may go out again once their cooldown has passed. No
+    # performance based selection here: the metrics that would drive it do
+    # not exist yet. Order is oldest-reused-first.
+    is_evergreen = fields.Boolean(
+        'Evergreen', default=False,
+        help="This post may be reused later.")
+    reuse_cooldown_days = fields.Integer(
+        'Reuse Cooldown (days)', default=30,
+        help="Minimum number of days before this post may go out again.")
+    last_reused_date = fields.Date('Last Reused', readonly=True, copy=False)
+
     # Customer approval step: internal approval hands the post to the
     # customer's users when the policy approval chain contains role 'customer'.
     approval_state = fields.Selection(
@@ -173,3 +185,42 @@ class SocialMarketingPost(models.Model):
                     _('This post is awaiting customer approval and cannot '
                       'be published yet.'))
         return super().action_post()
+
+
+    # ── Reuse pool helpers ───────────────────────────────────────────────
+
+    def _reuse_reference_date(self):
+        """Date the cooldown is counted from."""
+        self.ensure_one()
+        if self.last_reused_date:
+            return self.last_reused_date
+        if self.published_date:
+            return self.published_date.date()
+        return self.create_date.date()
+
+    @api.model
+    def _get_reusable_posts(self, brand, reference_date=None):
+        """Posts of ``brand`` that may be reused, oldest-reused-first.
+
+        Eligible means: evergreen, published, and at least
+        ``reuse_cooldown_days`` days past the last time it went out. A post
+        exactly on the cooldown boundary is eligible.
+        """
+        today = reference_date or fields.Date.context_today(self)
+        posts = self.search([
+            ('brand_id', '=', brand.id if brand else False),
+            ('is_evergreen', '=', True),
+            ('state', '=', 'posted'),
+        ])
+        eligible = posts.filtered(
+            lambda post: (today - post._reuse_reference_date()).days
+            >= post.reuse_cooldown_days)
+        return eligible.sorted(key=lambda post: post._reuse_reference_date())
+
+    def _mark_reused(self, reference_date=None):
+        """Stamp the reuse date so the cooldown restarts."""
+        self.write({
+            'last_reused_date': reference_date
+            or fields.Date.context_today(self),
+        })
+        return True
