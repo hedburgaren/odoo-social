@@ -6,6 +6,8 @@ import logging
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
+import pytz
+
 from odoo.tools.safe_eval import safe_eval
 
 from .content_source_core import (
@@ -18,6 +20,9 @@ from .content_source_core import (
 
 _logger = logging.getLogger(__name__)
 
+
+def _tz_get(self):
+    return [(tz, tz) for tz in sorted(pytz.all_timezones, key=lambda t: t)]
 
 class SocialContentSource(models.Model):
     """A recurring generator of social posts from any Odoo model.
@@ -79,6 +84,12 @@ class SocialContentSource(models.Model):
     time_of_day = fields.Float(
         'Time of Day', required=True, default=8.0,
         help="Odoo float time in UTC: 08:47 is 8.783333.")
+    tz = fields.Selection(
+        _tz_get, string='Timezone',
+        default=lambda self: self.env.user.tz or 'UTC', required=True,
+        help="Timezone the schedule is expressed in. A weekly source set to "
+             "08:47 fires at 08:47 local time, not 08:47 UTC.")
+
 
     active = fields.Boolean('Active', default=True)
     last_run = fields.Datetime('Last Run', readonly=True, copy=False)
@@ -101,7 +112,7 @@ class SocialContentSource(models.Model):
         for source in self:
             source.log_count = len(source.log_ids)
 
-    @api.depends('interval_type', 'weekday', 'day_of_month', 'time_of_day',
+    @api.depends('interval_type', 'weekday', 'day_of_month', 'time_of_day', 'tz',
                  'last_run', 'active')
     def _compute_next_run(self):
         for source in self:
@@ -140,16 +151,30 @@ class SocialContentSource(models.Model):
     # ── Scheduling ───────────────────────────────────────────────────────
 
     def _next_occurrence(self, from_dt=None):
-        """Next scheduled datetime strictly after ``from_dt`` (UTC, naive)."""
+        """Next scheduled datetime strictly after ``from_dt``.
+
+        Input and output are naive UTC, which is what Odoo stores, but the
+        schedule itself is expressed in the source's own timezone. A weekly
+        source asking for Monday 08:47 means 08:47 where the brand is, so the
+        arithmetic happens in local time and only the result is converted
+        back. Doing it the other way round drifts by an hour twice a year.
+        """
         self.ensure_one()
         from_dt = from_dt or fields.Datetime.now()
-        return compute_next_occurrence(
-            from_dt,
+        zone = pytz.timezone(self.tz or 'UTC')
+        local_from = pytz.utc.localize(from_dt).astimezone(zone).replace(
+            tzinfo=None)
+        local_next = compute_next_occurrence(
+            local_from,
             self.interval_type,
             weekday=self.weekday,
             day_of_month=self.day_of_month,
             time_of_day=self.time_of_day,
         )
+        if not local_next:
+            return local_next
+        return zone.localize(local_next).astimezone(pytz.utc).replace(
+            tzinfo=None)
 
     # ── Record rotation ──────────────────────────────────────────────────
 

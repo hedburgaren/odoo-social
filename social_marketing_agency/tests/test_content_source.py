@@ -378,3 +378,57 @@ class TestPostReusePool(TransactionCase):
         post._mark_reused(reference_date=self.today)
         self.assertEqual(post.last_reused_date, self.today)
         self.assertNotIn(post, self._eligible())
+
+
+class TestContentSourceTimezone(TransactionCase):
+    """The schedule is expressed in the source's timezone, not in UTC.
+
+    Odoo stores naive UTC, so a source asking for Monday 08:47 in Stockholm
+    must come back as 07:47 UTC in winter and 06:47 UTC in summer. Getting
+    this wrong is invisible in tests that only ever use UTC, and shows up in
+    production as posts going out an hour late for half the year.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.brand = self.env['social.brand'].create({
+            'name': 'TZ Brand',
+            'partner_id': self.env['res.partner'].create({
+                'name': 'TZ Customer', 'is_company': True}).id,
+        })
+        self.doc_model = self.env['ir.model']._get('social.agency.document')
+
+    def _source(self, tz):
+        return self.env['social.content.source'].create({
+            'name': 'TZ source %s' % tz,
+            'brand_id': self.brand.id,
+            'model_id': self.doc_model.id,
+            'domain': '[]',
+            'interval_type': 'weekly',
+            'weekday': 'mon',
+            'time_of_day': 8 + 47 / 60.0,
+            'tz': tz,
+        })
+
+    def test_winter_time_converts_to_utc(self):
+        source = self._source('Europe/Stockholm')
+        got = source._next_occurrence(datetime(2026, 1, 6, 12, 0, 0))
+        self.assertEqual(got.hour, 7)
+        self.assertEqual(got.minute, 47)
+
+    def test_summer_time_converts_to_utc(self):
+        source = self._source('Europe/Stockholm')
+        got = source._next_occurrence(datetime(2026, 7, 7, 12, 0, 0))
+        self.assertEqual(got.hour, 6)
+        self.assertEqual(got.minute, 47)
+
+    def test_utc_source_is_unshifted(self):
+        source = self._source('UTC')
+        got = source._next_occurrence(datetime(2026, 7, 7, 12, 0, 0))
+        self.assertEqual(got.hour, 8)
+        self.assertEqual(got.minute, 47)
+
+    def test_result_still_lands_on_the_requested_weekday(self):
+        source = self._source('Europe/Stockholm')
+        got = source._next_occurrence(datetime(2026, 7, 7, 12, 0, 0))
+        self.assertEqual(got.weekday(), 0)
