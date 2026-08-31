@@ -4,13 +4,13 @@
 
 from datetime import date, datetime, timedelta
 
+from odoo.exceptions import ValidationError
 from odoo.tests.common import TransactionCase, tagged
 
 from odoo.addons.social_marketing_agency.models.content_source_core import (
     compute_next_occurrence,
     float_to_time_parts,
     pick_next_id,
-    render_message,
 )
 
 
@@ -91,11 +91,27 @@ class TestContentSourceCore(TransactionCase):
         self.assertEqual(pick_next_id([1, 2, 3], [1, 2, 3]), (1, True))
         self.assertEqual(pick_next_id([], [1]), (None, False))
 
-    def test_render_message(self):
+    def test_core_holds_no_second_renderer(self):
+        """Substitution lives once, in the data binding core.
+
+        This module used to carry its own token regex and its own
+        ``render_message``. Both are gone, and this test exists so that a
+        future edit cannot quietly bring a second substitution path back.
+        """
+        from odoo.addons.social_marketing_agency.models import (
+            content_source_core,
+        )
+        for gone in ('render_message', 'extract_tokens', 'TOKEN_RE'):
+            self.assertFalse(
+                hasattr(content_source_core, gone),
+                '%s must not come back, bindings are the only renderer'
+                % gone)
+
+        from odoo.addons.social_marketing.models.social_data_binding_core \
+            import substitute_tokens
         self.assertEqual(
-            render_message('<p>{{ name }} rocks</p>', {'name': 'Widget'}),
+            substitute_tokens('<p>{{ name }} rocks</p>', {'name': 'Widget'}),
             '<p>Widget rocks</p>')
-        self.assertEqual(render_message('<p>{{ nope }}</p>', {}), '<p></p>')
 
 
 @tagged('post_install', '-at_install')
@@ -116,13 +132,24 @@ class TestContentSource(TransactionCase):
         self.brand_b = self.env['social.brand'].create({
             'name': 'Content Brand B', 'partner_id': self.customer_b.id,
         })
-        self.template = self.env['social_marketing.post.template'].create({
-            'message': '<p>Look at {{ name }}</p>',
-        })
         # social.agency.document is brand scoped, which makes it a convenient
         # stand-in for "any Odoo model with a brand_id" without pulling the
         # sale/stock chain into the test.
         self.doc_model = self.env['ir.model']._get('social.agency.document')
+        self.doc_name_field = self.env['ir.model.fields']._get(
+            'social.agency.document', 'name')
+        self.template = self.env['social_marketing.post.template'].create({
+            'message': '<p>Look at {{ name }}</p>',
+        })
+        # {{ name }} is only a token because a binding registers it. Without
+        # this record the token resolves to nothing, and a source using the
+        # template refuses to be saved.
+        self.binding = self.env['social.data.binding'].create({
+            'name': 'name',
+            'post_template_id': self.template.id,
+            'model_id': self.doc_model.id,
+            'field_id': self.doc_name_field.id,
+        })
         self.doc_type = self.env['social.agency.document.type'].create({
             'name': 'Content Source Test Type',
         })
@@ -224,11 +251,108 @@ class TestContentSource(TransactionCase):
         self.assertFalse(post.live_post_ids)
 
     def test_generated_post_renders_template_and_carries_brand(self):
+        """End to end: registered binding, generated draft, resolved value."""
         doc = self._make_doc('Blue Widget', self.brand_a)
         source = self._make_source(self.brand_a)
         post = source._generate_post()
+        self.assertEqual(post.message, '<p>Look at Blue Widget</p>')
         self.assertIn(doc.name, post.message)
+        self.assertEqual(post.state, 'draft')
         self.assertEqual(post.brand_id, self.brand_a)
+
+    def test_binding_formatting_is_the_one_used_by_generation(self):
+        """Generation gets the binding model's formatting, not str()."""
+        template = self.env['social_marketing.post.template'].create({
+            'message': '<p>{{ kind }}</p>',
+        })
+        self.env['social.data.binding'].create({
+            'name': 'kind',
+            'post_template_id': template.id,
+            'model_id': self.doc_model.id,
+            'field_id': self.env['ir.model.fields']._get(
+                'social.agency.document', 'type_id').id,
+        })
+        self._make_doc('Doc', self.brand_a)
+        source = self._make_source(self.brand_a, post_template_id=template.id)
+        post = source._generate_post()
+        # A many2one renders as its display name, never as a raw recordset.
+        self.assertEqual(
+            post.message, '<p>%s</p>' % self.doc_type.display_name)
+
+    def test_unregistered_token_is_refused_at_save_time(self):
+        """A source whose template has an unbound token cannot be saved.
+
+        System 2 accepted any field name implicitly. That is exactly what
+        made the field picker pointless, so the implicit path is gone and
+        the misconfiguration is reported where it is fixable instead of
+        producing empty posts forever.
+        """
+        loose = self.env['social_marketing.post.template'].create({
+            'message': '<p>Look at {{ name }} for {{ nobody_bound_this }}</p>',
+        })
+        self.env['social.data.binding'].create({
+            'name': 'name',
+            'post_template_id': loose.id,
+            'model_id': self.doc_model.id,
+            'field_id': self.doc_name_field.id,
+        })
+        with self.assertRaises(ValidationError) as caught:
+            self._make_source(self.brand_a, post_template_id=loose.id)
+        self.assertIn('nobody_bound_this', str(caught.exception))
+
+    def test_binding_for_another_model_does_not_count_as_bound(self):
+        """A token bound to the wrong model resolves to nothing."""
+        wrong = self.env['social_marketing.post.template'].create({
+            'message': '<p>{{ name }}</p>',
+        })
+        partner_model = self.env['ir.model']._get('res.partner')
+        self.env['social.data.binding'].create({
+            'name': 'name',
+            'post_template_id': wrong.id,
+            'model_id': partner_model.id,
+            'field_id': self.env['ir.model.fields']._get(
+                'res.partner', 'name').id,
+        })
+        with self.assertRaises(ValidationError):
+            self._make_source(self.brand_a, post_template_id=wrong.id)
+
+    def test_warning_field_reports_drift_after_the_template_changes(self):
+        """The template can drift after the source was saved."""
+        source = self._make_source(self.brand_a)
+        self.assertFalse(source.unbound_token_warning)
+        self.template.message = '<p>Look at {{ name }} and {{ price }}</p>'
+        source.invalidate_recordset()
+        self.assertEqual(source.unbound_token_warning, 'price')
+
+    def test_empty_render_falls_back_to_display_name(self):
+        """A render that comes out empty still yields the record name.
+
+        Deliberate, and it survives the consolidation: an empty message is
+        worse than a plain one.
+        """
+        # A template made of one token bound to a field the record leaves
+        # blank renders to nothing at all.
+        blank = self.env['social_marketing.post.template'].create({
+            'message': '{{ description }}',
+        })
+        self.env['social.data.binding'].create({
+            'name': 'description',
+            'post_template_id': blank.id,
+            'model_id': self.doc_model.id,
+            'field_id': self.env['ir.model.fields']._get(
+                'social.agency.document', 'description').id,
+        })
+        doc = self._make_doc('Fallback Doc', self.brand_a)
+        self.assertFalse(doc.description)
+        source = self._make_source(self.brand_a, post_template_id=blank.id)
+        post = source._generate_post()
+        self.assertEqual(post.message, '<p>%s</p>' % doc.display_name)
+
+    def test_source_without_a_template_falls_back_to_display_name(self):
+        doc = self._make_doc('No Template Doc', self.brand_a)
+        source = self._make_source(self.brand_a, post_template_id=False)
+        post = source._generate_post()
+        self.assertEqual(post.message, '<p>%s</p>' % doc.display_name)
 
     def test_generated_post_is_stamped_with_the_campaign(self):
         self._make_doc('Doc', self.brand_a)

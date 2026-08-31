@@ -10,12 +10,17 @@ import pytz
 
 from odoo.tools.safe_eval import safe_eval
 
+from odoo.addons.social_marketing.models.social_data_binding_core import (
+    collect_tokens,
+)
+from odoo.addons.social_marketing.models.social_marketing_post_template import (
+    _html_to_plain_text,
+)
+
 from .content_source_core import (
     WEEKDAYS,
     compute_next_occurrence,
-    extract_tokens,
     pick_next_id,
-    render_message,
 )
 
 _logger = logging.getLogger(__name__)
@@ -54,8 +59,9 @@ class SocialContentSource(models.Model):
 
     post_template_id = fields.Many2one(
         'social_marketing.post.template', string='Post Template',
-        help="Text template. Use {{ field_name }} placeholders to inject "
-             "values of the picked record.")
+        help="Text template. Every {{ token }} it uses must be registered "
+             "as a data binding on the template itself, pointing at a field "
+             "of this source's model.")
     image_template_id = fields.Many2one(
         'social.image.template', string='Image Template')
     account_ids = fields.Many2many(
@@ -104,6 +110,10 @@ class SocialContentSource(models.Model):
     log_ids = fields.One2many(
         'social.content.source.log', 'source_id', string='Generated Posts')
     log_count = fields.Integer('Generated', compute='_compute_log_count')
+    unbound_token_warning = fields.Char(
+        'Unbound Tokens', compute='_compute_unbound_token_warning',
+        help="Filled in when the post template uses tokens this source "
+             "cannot resolve, which would generate empty posts.")
 
     # ── Computes and constraints ─────────────────────────────────────────
 
@@ -111,6 +121,49 @@ class SocialContentSource(models.Model):
     def _compute_log_count(self):
         for source in self:
             source.log_count = len(source.log_ids)
+
+    def _unbound_tokens(self):
+        """Tokens the post template uses that this source cannot resolve.
+
+        A token resolves only when the template carries a
+        ``social.data.binding`` of that name pointing at this source's own
+        model. Anything else renders as an empty string, so it is listed
+        here rather than left to be discovered in a published post.
+        """
+        self.ensure_one()
+        template = self.post_template_id
+        if not template:
+            return []
+        model_name = self.model_id.model
+        bound = set(template.binding_ids.filtered(
+            lambda binding: binding.model_id.model == model_name
+        ).mapped('name'))
+        return [token for token in collect_tokens(template.message or '')
+                if token not in bound]
+
+    @api.depends('model_id', 'post_template_id',
+                 'post_template_id.message',
+                 'post_template_id.binding_ids.name',
+                 'post_template_id.binding_ids.model_id')
+    def _compute_unbound_token_warning(self):
+        for source in self:
+            unbound = source._unbound_tokens() if source.post_template_id else []
+            source.unbound_token_warning = ', '.join(unbound)
+
+    @api.constrains('model_id', 'post_template_id')
+    def _check_template_tokens_are_bound(self):
+        for source in self:
+            unbound = source._unbound_tokens()
+            if unbound:
+                raise ValidationError(_(
+                    "Post template %(template)s uses tokens this source "
+                    "cannot resolve: %(tokens)s. Register a data binding "
+                    "for each of them on the template, pointing at a field "
+                    "of %(model)s. Without one the token renders as empty "
+                    "text and every generated post is blank.",
+                    template=source.post_template_id.display_name or '',
+                    tokens=', '.join(unbound),
+                    model=source.model_id.model or ''))
 
     @api.depends('interval_type', 'weekday', 'day_of_month', 'time_of_day', 'tz',
                  'last_run', 'active')
@@ -217,27 +270,23 @@ class SocialContentSource(models.Model):
 
     # ── Post generation ──────────────────────────────────────────────────
 
-    def _record_bindings(self, record):
-        """Values available to {{ token }} placeholders for ``record``."""
-        self.ensure_one()
-        bindings = {
-            'record': record.display_name,
-            'display_name': record.display_name,
-        }
-        template = self.post_template_id.message or ''
-        for token in extract_tokens(template):
-            if token in bindings:
-                continue
-            if token in record._fields:
-                bindings[token] = record[token]
-        return bindings
-
     def _prepare_post_values(self, record):
-        """Values for the draft post generated from ``record``."""
+        """Values for the draft post generated from ``record``.
+
+        Token substitution goes through the post template's registered
+        ``social.data.binding`` records, the same path (and the same
+        formatting) the template's own preview uses. There is no implicit
+        "any field name is a token" fallback: a token nobody registered
+        renders empty, on purpose, and :meth:`_check_template_tokens_are_bound`
+        refuses to let a source be saved in that state.
+        """
         self.ensure_one()
-        bindings = self._record_bindings(record)
-        message = render_message(self.post_template_id.message or '', bindings)
-        if not (message or '').strip():
+        template = self.post_template_id
+        message = template.render_bound_message(record) if template else ''
+        # Emptiness is judged on the plain text, not on the markup: a
+        # template that is one token renders to "<p></p>", which is not a
+        # message, and a post model constraint would reject it anyway.
+        if not _html_to_plain_text(message):
             message = '<p>%s</p>' % (record.display_name or '')
         return {
             'message': message,
@@ -254,12 +303,12 @@ class SocialContentSource(models.Model):
         self.ensure_one()
         if not self.image_template_id:
             return
-        bindings = {
-            key: str(value or '')
-            for key, value in self._record_bindings(record).items()
-        }
         try:
-            attachment = self.image_template_id.render_template(bindings)
+            # The image template's own bindings supply the values, which is
+            # also what turns a binary field into a /web/image/... source
+            # the render service can actually fetch.
+            attachment = self.image_template_id.render_template_for_record(
+                record)
         except Exception:
             _logger.warning(
                 'Content source %s could not render an image for %s,%s',
