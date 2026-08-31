@@ -112,3 +112,52 @@ class TestPortalAccess(TransactionCase):
             [('partner_id', '=', contact2.id)], limit=1)
         self.assertTrue(user2.has_group(
             'social_marketing_agency.group_social_customer_editor'))
+
+
+class TestInviteBrandScope(TransactionCase):
+    """An agency user must not reach invites for a brand they do not hold.
+
+    Every other brand-scoped model restricts group_social_agency_brand_user to
+    user.brand_ids. social.agency.invite had no rule at all, which let an
+    agency user scoped to one brand create an invitation into another. That is
+    privilege escalation, not merely a visibility leak: the invitation is what
+    grants a contact access to a brand.
+    """
+
+    def setUp(self):
+        super().setUp()
+        Partner = self.env['res.partner']
+        self.cust_a = Partner.create({'name': 'Scope Cust A', 'is_company': True})
+        self.cust_b = Partner.create({'name': 'Scope Cust B', 'is_company': True})
+        self.contact_b = Partner.create({
+            'name': 'Contact B', 'parent_id': self.cust_b.id,
+            'email': 'contact.b@example.com'})
+        Brand = self.env['social.brand']
+        self.brand_a = Brand.create({
+            'name': 'Scope Brand A', 'partner_id': self.cust_a.id})
+        self.brand_b = Brand.create({
+            'name': 'Scope Brand B', 'partner_id': self.cust_b.id})
+        self.agency_user = self.env['res.users'].create({
+            'name': 'Agency Scoped',
+            'login': 'agency_scoped_test',
+            'groups_id': [(4, self.env.ref(
+                'social_marketing_agency.group_social_agency_brand_user').id)],
+            'brand_ids': [(6, 0, [self.brand_a.id])],
+        })
+
+    def test_agency_user_cannot_create_invite_for_other_brand(self):
+        with self.assertRaises(AccessError):
+            self.env['social.agency.invite'].with_user(
+                self.agency_user).create({
+                    'brand_id': self.brand_b.id,
+                    'partner_id': self.contact_b.id,
+                })
+
+    def test_agency_user_cannot_read_other_brand_invite(self):
+        invite = self.env['social.agency.invite'].sudo().create({
+            'brand_id': self.brand_b.id,
+            'partner_id': self.contact_b.id,
+        })
+        found = self.env['social.agency.invite'].with_user(
+            self.agency_user).search([])
+        self.assertNotIn(invite.id, found.ids)
