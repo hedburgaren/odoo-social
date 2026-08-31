@@ -432,4 +432,65 @@
         <field name="perm_unlink" eval="1"/>
     </record>
 
+    <!-- social_marketing.stream.post: the unified inbox.
+
+         Incoming items carry other people's names, messages and profile
+         links, so this is third party personal data and the isolation has to
+         hold on every path into the ORM, not only on search(). brand_id is a
+         stored column on the item itself (related from the stream), so the
+         domains below are plain column tests that _search applies to
+         search(), search_count(), name_search(), read_group() and browse()
+         alike.
+
+         Three rules, ORed per group as Odoo does:
+           - agency brand user: only the brands assigned to the user;
+           - social user: brandless items (a plain non-agency feed) plus the
+             brands assigned to the user, so holding both groups cannot widen
+             the agency scope;
+           - manager: everything, permissive.
+    -->
+    <record id="rule_social_stream_post_agency_user" model="ir.rule">
+        <field name="name">Inbox item: agency user restricted to own brands</field>
+        <field name="model_id" ref="social_marketing.model_social_marketing_stream_post"/>
+        <field name="domain_force">[('brand_id', 'in', user.brand_ids.ids)]</field>
+        <field name="groups" eval="[(4, ref('group_social_agency_brand_user'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <record id="rule_social_stream_post_social_user" model="ir.rule">
+        <field name="name">Inbox item: social user restricted to own brands</field>
+        <field name="model_id" ref="social_marketing.model_social_marketing_stream_post"/>
+        <field name="domain_force">['|', ('brand_id', '=', False), ('brand_id', 'in', user.brand_ids.ids)]</field>
+        <field name="groups" eval="[(4, ref('social_marketing.group_social_marketing_user'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <record id="rule_social_stream_post_manager_all" model="ir.rule">
+        <field name="name">Inbox item: manager sees all brands</field>
+        <field name="model_id" ref="social_marketing.model_social_marketing_stream_post"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('social_marketing.group_social_marketing_manager'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <record id="rule_social_stream_post_customer_read" model="ir.rule">
+        <field name="name">Inbox item: customer read own brands</field>
+        <field name="model_id" ref="social_marketing.model_social_marketing_stream_post"/>
+        <field name="domain_force">[('brand_id.partner_id', '=', user.partner_id.commercial_partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('group_social_customer_approver')), (4, ref('group_social_customer_editor'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
 </odoo>

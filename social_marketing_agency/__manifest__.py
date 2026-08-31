@@ -35,6 +35,7 @@
         "views/social_agency_invite_views.xml",
         "views/dashboard_views.xml",
         "views/menu_views.xml",
+        "views/social_marketing_inbox_views.xml",
         "views/portal_templates.xml",
         "wizard/social_brand_report_wizard_views.xml",
         "report/social_brand_report_actions.xml",

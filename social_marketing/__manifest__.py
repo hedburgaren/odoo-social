@@ -27,6 +27,7 @@
         'views/discuss_channel_view.xml',
         # 'views/utm_campaign_views.xml',
         'views/social_marketing_stream_post_views.xml',
+        'views/social_marketing_inbox_views.xml',
         'views/social_marketing_stream_views.xml',
         'views/social_marketing_live_post_views.xml',
         'views/social_marketing_stat_views.xml',
