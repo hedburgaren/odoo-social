@@ -41,6 +41,14 @@
                     <div class="oe_title">
                         <h1><field name="name" placeholder="e.g. One product every Monday"/></h1>
                     </div>
+                    <div class="alert alert-warning" role="alert"
+                         invisible="not unbound_token_warning">
+                        The post template uses tokens no data binding
+                        resolves for this model:
+                        <field name="unbound_token_warning" class="oe_inline"/>.
+                        Add a data binding for each of them on the post
+                        template, otherwise generated posts come out empty.
+                    </div>
                     <group>
                         <group string="What to post">
                             <field name="brand_id"/>

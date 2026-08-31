@@ -11,13 +11,15 @@ All datetimes are naive and are treated as UTC, exactly like Odoo stores them.
 """
 
 import calendar
-import re
 from datetime import datetime, timedelta
 
 WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
-# Matches {{ token }} with optional surrounding whitespace.
-TOKEN_RE = re.compile(r'\{\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*\}\}')
+# Token substitution deliberately does NOT live here. It lives once, in
+# ``social_marketing/models/social_data_binding_core.py``, driven by the
+# registered ``social.data.binding`` records of the template being
+# rendered. A second substitution path would be a second, unregistered
+# read surface onto the database, so there is not one.
 
 
 def float_to_time_parts(time_of_day):
@@ -98,27 +100,3 @@ def pick_next_id(candidate_ids, posted_ids):
     if candidate_ids:
         return candidate_ids[0], True
     return None, False
-
-
-def extract_tokens(template):
-    """Return the ordered, de-duplicated {{ token }} names in ``template``."""
-    seen = []
-    for name in TOKEN_RE.findall(template or ''):
-        if name not in seen:
-            seen.append(name)
-    return seen
-
-
-def render_message(template, values):
-    """Substitute {{ token }} placeholders in ``template`` with ``values``.
-
-    Unknown tokens are replaced by an empty string. No expression evaluation
-    happens here, so a template can never execute anything.
-    """
-    if not template:
-        return ''
-
-    def _replace(match):
-        return str(values.get(match.group(1), '') or '')
-
-    return TOKEN_RE.sub(_replace, template)
