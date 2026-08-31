@@ -2,6 +2,7 @@
 from . import test_brand
 from . import test_document
 from . import test_portal_access
+from . import test_portal_controllers
 from . import test_approval
 from . import test_brand_kit
 from . import test_content_source

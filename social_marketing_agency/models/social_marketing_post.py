@@ -4,6 +4,8 @@
 import json
 import logging
 
+from markupsafe import escape
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
@@ -14,7 +16,11 @@ class SocialMarketingPost(models.Model):
     _name = 'social_marketing.post'
     """Post scoped to a brand, with a customer approval step."""
 
-    _inherit = ['social_marketing.post', 'social.brand.focus.mixin']
+    _inherit = [
+        'social_marketing.post',
+        'social.brand.focus.mixin',
+        'portal.mixin',
+    ]
 
     brand_id = fields.Many2one(
         'social.brand', string='Brand',
@@ -54,6 +60,86 @@ class SocialMarketingPost(models.Model):
                     vals['name'] = self.env['utm.source']._generate_name(
                         self, content)
         return super().create(vals_list)
+
+    # ── Portal addressing ────────────────────────────────────────────────
+
+    def _compute_access_url(self):
+        """Portal url of the post, used by portal.mixin share links."""
+        super()._compute_access_url()
+        for post in self:
+            post.access_url = '/my/social-posts/%s' % (post.id,)
+
+    # ── Editing a post resets the approval it already collected ──────────
+
+    # The fields that decide what actually gets published. An approval is an
+    # approval of this content and nothing else, so changing any of it has to
+    # send the post back to the start of the chain. Scheduling fields are
+    # deliberately not in the list: moving a post in time does not change what
+    # the customer looked at.
+    APPROVAL_MATERIAL_FIELDS = ('message', 'image_ids', 'account_ids')
+
+    # States where approval progress exists and can therefore be lost.
+    APPROVAL_IN_PROGRESS_STATES = (
+        'pending_approval', 'awaiting_customer', 'approved')
+
+    def _approval_material_signature(self):
+        """Fingerprint of the content the approval decision was made on."""
+        self.ensure_one()
+        return (
+            self.message or '',
+            tuple(sorted(self.image_ids.ids)),
+            tuple(sorted(self.account_ids.ids)),
+        )
+
+    def write(self, vals):
+        """Reset approval progress when the approved content itself changes.
+
+        Without this, an agency user could get a post approved and then edit
+        the message before it goes out, so the customer would have approved
+        something other than what is published. That defeats the whole gate.
+        """
+        touches_content = any(
+            field in vals for field in self.APPROVAL_MATERIAL_FIELDS)
+        before = {}
+        if touches_content:
+            for post in self:
+                # A post that is already out cannot be un-approved: the
+                # content has been published, and relabelling it as draft
+                # would only hide that fact.
+                if (post.approval_state in self.APPROVAL_IN_PROGRESS_STATES
+                        and post.state not in ('posting', 'posted')):
+                    before[post.id] = post._approval_material_signature()
+        res = super().write(vals)
+        for post in self.filtered(lambda p: p.id in before):
+            if post._approval_material_signature() != before[post.id]:
+                post._reset_approval_after_edit()
+        return res
+
+    def _reset_approval_after_edit(self):
+        """Send an edited post back to the start of the approval chain."""
+        self.ensure_one()
+        previous_state = self.approval_state
+        # Writes only non-material fields, so this cannot recurse.
+        self.write({
+            'approval_state': 'draft',
+            'compliance_check_passed': False,
+            'compliance_snapshot': False,
+            'compliance_checked_at': False,
+            'compliance_recheck_verdict': False,
+            'needs_recheck': False,
+        })
+        # The open approval activities belong to the reviewer and to the
+        # customer users, not to whoever did the edit, so they can only be
+        # withdrawn with elevated rights. Scoped to this one call.
+        self.sudo().activity_unlink(['mail.mail_activity_data_todo'])
+        self._safe_message_post(
+            body=_('Post content changed while it was in state %(state)s. '
+                   'The approval was reset and the post has to go through '
+                   'the approval chain again.',
+                   state=previous_state),
+            message_type='notification',
+            subtype_xmlid='mail.mt_comment')
+        return True
 
     # ── Customer approval helpers ────────────────────────────────────────
 
@@ -167,13 +253,19 @@ class SocialMarketingPost(models.Model):
             'approval_state': 'rejected',
             'rejection_reason': reason or _('Rejected by customer'),
         })
+        # The author is an internal agency user and a portal user may not
+        # read res.users, so resolve that one recipient with elevated rights.
+        # Nothing else in this method is elevated.
+        author_partner = self.sudo().create_uid.partner_id
+        # The reason is customer supplied text and the chatter body is an
+        # html field, so escape it rather than letting it be interpreted.
         self._safe_message_post(
             body=_('Post rejected by customer %(user)s. Reason: %(reason)s',
-                   user=self.env.user.name,
-                   reason=self.rejection_reason),
+                   user=escape(self.env.user.name),
+                   reason=escape(self.rejection_reason)),
             message_type='notification',
             subtype_xmlid='mail.mt_comment',
-            partner_ids=[self.create_uid.partner_id.id])
+            partner_ids=author_partner.ids)
         self.sudo().activity_feedback(['mail.mail_activity_data_todo'])
         return True
 
