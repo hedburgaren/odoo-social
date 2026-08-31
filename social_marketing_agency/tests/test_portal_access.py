@@ -161,3 +161,72 @@ class TestInviteBrandScope(TransactionCase):
         found = self.env['social.agency.invite'].with_user(
             self.agency_user).search([])
         self.assertNotIn(invite.id, found.ids)
+
+
+class TestBrandRecordRule(TransactionCase):
+    """social.brand must isolate agency users through a record rule.
+
+    The model overrides search() to filter on user.brand_ids. That override
+    reads like an access control and is not one: search_count, name_search,
+    read_group and browse all reach the ORM through _search and never pass
+    through it. Before the rule existed, an agency user scoped to one brand
+    could browse another brand's record and read it in full.
+
+    Each method below is checked separately on purpose. A single search()
+    assertion passed the whole time the data was leaking.
+    """
+
+    def setUp(self):
+        super().setUp()
+        Partner = self.env['res.partner']
+        cust_a = Partner.create({'name': 'Rule Cust A', 'is_company': True})
+        cust_b = Partner.create({'name': 'Rule Cust B', 'is_company': True})
+        Brand = self.env['social.brand']
+        self.brand_a = Brand.create({
+            'name': 'Rule Brand A', 'partner_id': cust_a.id})
+        self.brand_b = Brand.create({
+            'name': 'Rule Brand B', 'partner_id': cust_b.id})
+        self.agency_user = self.env['res.users'].create({
+            'name': 'Rule Agency',
+            'login': 'rule_agency_test',
+            'groups_id': [(4, self.env.ref(
+                'social_marketing_agency.group_social_agency_brand_user').id)],
+            'brand_ids': [(6, 0, [self.brand_a.id])],
+        })
+
+    def _as_agency(self):
+        return self.env['social.brand'].with_user(self.agency_user)
+
+    def test_search_returns_only_own_brand(self):
+        self.assertEqual(self._as_agency().search([]), self.brand_a)
+
+    def test_search_count_does_not_leak_other_brands(self):
+        self.assertEqual(self._as_agency().search_count([]), 1)
+
+    def test_name_search_does_not_leak_other_brands(self):
+        names = [name for _id, name in self._as_agency().name_search()]
+        self.assertNotIn(self.brand_b.name, names)
+
+    def test_read_group_does_not_leak_other_brands(self):
+        groups = self._as_agency().read_group([], ['id'], ['partner_id'])
+        partner_ids = [g['partner_id'][0] for g in groups if g['partner_id']]
+        self.assertNotIn(self.brand_b.partner_id.id, partner_ids)
+
+    def test_browse_other_brand_is_refused(self):
+        with self.assertRaises(AccessError):
+            self._as_agency().browse(self.brand_b.id).name
+
+    def test_manager_still_sees_every_brand(self):
+        manager = self.env['res.users'].create({
+            'name': 'Rule Manager',
+            'login': 'rule_manager_test',
+            'groups_id': [
+                (4, self.env.ref(
+                    'social_marketing.group_social_marketing_manager').id),
+                (4, self.env.ref(
+                    'social_marketing_agency.group_social_agency_brand_user').id),
+            ],
+        })
+        found = self.env['social.brand'].with_user(manager).search([])
+        self.assertIn(self.brand_a, found)
+        self.assertIn(self.brand_b, found)
