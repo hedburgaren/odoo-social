@@ -398,4 +398,38 @@
         <field name="perm_unlink" eval="1"/>
     </record>
 
+
+    <!-- social.brand isolation for agency users.
+
+         social.brand overrides search() to filter by user.brand_ids, which
+         looks like an access restriction and is not one: search_count(),
+         name_search(), read_group() and browse() all go through _search()
+         and never see that override. An agency user scoped to one brand
+         could read another brand's record directly. Only the customer
+         groups had a record rule; the agency group had none.
+
+         The manager rule is permissive and is ORed with the restrictive one,
+         so a manager who also holds the agency group keeps full access. -->
+    <record id="rule_social_brand_agency_user" model="ir.rule">
+        <field name="name">Brand: agency user restricted to own brands</field>
+        <field name="model_id" ref="model_social_brand"/>
+        <field name="domain_force">[('id', 'in', user.brand_ids.ids)]</field>
+        <field name="groups" eval="[(4, ref('group_social_agency_brand_user'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <record id="rule_social_brand_manager_all" model="ir.rule">
+        <field name="name">Brand: manager sees all brands</field>
+        <field name="model_id" ref="model_social_brand"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('social_marketing.group_social_marketing_manager'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="1"/>
+    </record>
+
 </odoo>
